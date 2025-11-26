@@ -16,12 +16,12 @@ const toJson = function<T>(res: AxiosResponse): T | undefined {
   return safeGet<T>(data, "data");
 }
 
-export const id = 226;
+export const id = 262;
 
 export const getColumnList = async function<T>(): Promise<T | undefined> {
-  const res = await axios.get("/eci-comic/project/settingCollectionTable/getFSHeaderInfo", {
+  const res = await axios.get("/lqa-game/lqaTestCaseFs/getFSHeaderInfo", {
     params: {
-      collectionManageId: id
+      testManageId: id
     },
     responseType: "json",
   });
@@ -47,9 +47,9 @@ export const toRowList = function<T>(array: T[] = []): T[] {
 }
 
 export const getRowList = async function<T>(): Promise<T[]> {
-  const res = await axios.get("/eci-comic/project/settingCollectionTable/getFSDataInfo", {
+  const res = await axios.get("/lqa-game/lqaTestCaseFs/getFSDataInfo", {
     params: {
-      collectionManageId: id
+      testManageId: id
     },
     responseType: "json",
   });
