@@ -1,11 +1,11 @@
 {
-  "name": "@ue/message",
+  "name": "@ue/sheet",
   "private": false,
-  "version": "0.0.7",
+  "version": "0.0.1",
   "type": "module",
   "types": "types/index.d.ts",
   "license": "MIT",
-  "main": "dist/message",
+  "main": "dist/sheet",
   "scripts": {
     "test": "vite --clearScreen --port 3000",
     "build": "vite build",
@@ -20,10 +20,10 @@
     "email": "svon.me@gmail.com",
     "url": "https://github.com/svonme"
   },
-  "homepage": "https://github.com/eci-ue/message#readme",
+  "homepage": "https://github.com/eci-ue/sheet#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eci-ue/message.git"
+    "url": "git+https://github.com/eci-ue/sheet.git"
   },
   "dependencies": {
     "@visactor/vtable": "^1.19.3",
