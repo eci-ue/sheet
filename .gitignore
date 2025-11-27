@@ -22,7 +22,6 @@ tsconfig.tsbuildinfo
 !.vscode/extensions.json
 .idea
 .DS_Store
-.npmrc
 *.suo
 *.ntvs*
 *.njsproj
