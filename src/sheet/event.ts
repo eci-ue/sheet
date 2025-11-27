@@ -9,7 +9,7 @@ import type {EmitFn} from "vue";
 import type {Cell} from "../types/sheet";
 import type {EditCellData} from "../types/sheet";
 
-export const emitNames = ["change"];
+export const emitNames = ["change", "addColumn"];
 
 export enum ToolbarEvent {
   Clean = "clean",  // 清除样式

@@ -7,7 +7,7 @@ const axios = new Axios({
   baseURL: "/api/eci-comic"
 });
 
-const toJson = function<T>(res: AxiosResponse): T | undefined {
+const toJson = function <T>(res: AxiosResponse): T | undefined {
   let data = res.data;
   if (typeof data === "string") {
     data = JSON.parse(data);
@@ -15,10 +15,10 @@ const toJson = function<T>(res: AxiosResponse): T | undefined {
   return safeGet<T>(data, "data");
 }
 
-export const id = 226;
+export const id = 224;
 export const sheetKey = "collectionManageId";
 
-export const getColumnList = async function<T>(): Promise<T | undefined> {
+export const getColumnList = async function <T>(): Promise<T | undefined> {
   const res = await axios.get("/project/settingCollectionTable/getFSHeaderInfo", {
     params: {
       [sheetKey]: id
@@ -28,7 +28,7 @@ export const getColumnList = async function<T>(): Promise<T | undefined> {
   return toJson<T>(res);
 }
 
-export const toRowList = function<T>(array: T[] = []): T[] {
+export const toRowList = function <T>(array: T[] = []): T[] {
   const list: T[] = [];
   for (const item of array) {
     const tr = _.omit(item as object, ["tableList"]) as object;
@@ -48,7 +48,7 @@ export const toRowList = function<T>(array: T[] = []): T[] {
   return list;
 }
 
-export const getRowList = async function<T>(): Promise<T[]> {
+export const getRowList = async function <T>(): Promise<T[]> {
   const res = await axios.get("/project/settingCollectionTable/getFSDataInfo", {
     params: {
       [sheetKey]: id
@@ -59,7 +59,7 @@ export const getRowList = async function<T>(): Promise<T[]> {
   return toRowList<T>(list);
 }
 
-export const updateCells = async function(list: object[] = []): Promise<boolean> {
+export const updateCells = async function (list: object[] = []): Promise<boolean> {
   const data: object[] = [];
   for (const item of list) {
     const style = safeGet<object>(item, "style") || {};
@@ -75,5 +75,18 @@ export const updateCells = async function(list: object[] = []): Promise<boolean>
       "Content-Type": "application/json"
     }
   });
+  return res.status >= 200 && res.status <= 300;
+}
+
+export const addColumn = async function (column: object = {}, columnId?: string, direction: number = 1): Promise<boolean> {
+  const options = safeGet<object[]>(column, "options") || [];
+  const data = {...column, [sheetKey]: id, options: JSON.stringify(options)};
+  const res = await axios.post("/project/settingCollectionTable/addColumn", JSON.stringify(data), {
+    params: columnId ? {columnId, direction} : {},
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
   return res.status >= 200 && res.status <= 300;
 }

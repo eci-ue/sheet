@@ -2,11 +2,12 @@
 import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
 import {onMounted, watch} from "vue";
+import AddColumnIcon from "./icon/plus.svg";
 import {useColumnList, useRowList} from "./use";
+import {Column, CellType} from "../types/sheet";
 import {SheetConfig, StyleValue} from "./config";
 import {emitNames, ToolbarEvent, useEvent} from "./event";
-import {Group, ListColumn, ListTable, Text} from "@visactor/vue-vtable";
-
+import {Group, ListColumn, ListTable, Text, Image} from "@visactor/vue-vtable";
 
 import type {PropType} from "vue";
 import type {ColumnList, ContextMenu, RowList} from "../types/prop";
@@ -89,6 +90,17 @@ const onLoad = function (type?: string) {
   }
 }
 
+const onAddColumn = function () {
+  const data = new Column();
+  data.type = CellType.text;
+  data.sheetId = props.sheetId;
+
+  $emit("addColumn", {
+    column: data,
+    direction: 1,
+    columnId: void 0,
+  })
+}
 
 
 onMounted(function () {
@@ -125,13 +137,14 @@ defineExpose({
                     :options="column.options"
                     :type="column.type">
           <template #customLayout="{ width, height, record }">
-            <Group :width="width" :height="height" display="flex" align-items="center">
-              <Group :width="width" :height="height" display="flex" align-items="center" :fill="StyleValue(column.columnId, record, ToolbarEvent.Fill)">
+            <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center">
+              <Group :width="width - 2" :height="height - 2" display="flex" align-items="center"
+                     :fill="StyleValue(column.columnId, record, ToolbarEvent.Fill)">
                 <template v-if="record[column.columnId] && _.isString(record[column.columnId])">
                   <Text :text="record[column.columnId]"
                         :fontSize="14"
                         fontFamily="sans-serif"
-                        :boundsPadding="[0, 15, 0, 15]"/>
+                        :boundsPadding="[0, 13, 0, 13]"/>
                 </template>
                 <template v-else-if="record[column.columnId]">
                   <Text :text="record[column.columnId].txt"
@@ -146,7 +159,15 @@ defineExpose({
                 </template>
               </Group>
             </Group>
-
+          </template>
+        </ListColumn>
+        <ListColumn field="add_column" :width="60" :drag-header="false" :drag-body="false" :sortable="false"
+                    :disable-select="true" :disable-column-resize="true" :disable-header-select="true"
+                    :merge-cell="false">
+          <template #headerCustomLayout="{ width, height }">
+            <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center" cursor="pointer" :padding="0" @dblclick="onAddColumn()">
+              <Image :image="AddColumnIcon" :width="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"/>
+            </Group>
           </template>
         </ListColumn>
       </ListTable>

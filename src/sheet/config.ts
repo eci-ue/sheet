@@ -1,10 +1,64 @@
-
+import * as _ from "lodash-es";
 import {ToolbarEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
-import { merge as customMergeCell } from "./merge";
+import {merge as customMergeCell} from "./merge";
 
-import type { Cell } from "../types/sheet";
-import type { ContextMenu } from "../types/prop";
+import type {Cell} from "../types/sheet";
+import type {ContextMenu} from "../types/prop";
+
+export const getColumnMenu = function () {
+  return [
+    {key: "Text", value: "Text"},
+    {key: "Number", value: "Number"},
+  ];
+}
+
+export enum MenuEvent {
+  addColumn = "add-column",
+  addRow = "add-row",
+  editColumn = "edit-column", // 编辑列 - 标题数据
+  removeColumn = "remove-column", // 删除列
+  removeRow = "remove-row", // 删除行
+  emptyCell = "empty-cell", // 删除单元格数据
+  merge = "merge",
+}
+
+export const SheetMenuConfig = function (sheetId: number | string | undefined, disabled: boolean, field: string, row: number, col: number): object[] | undefined {
+  if (disabled) {
+    return [];
+  }
+  const menus = getColumnMenu();
+  // 只在数据行显示菜单，不在表头显示
+  if (row === 0) {
+    if (col > 0) {
+      const list = [];
+      if (field !== "add_column") {
+        list.push(
+          {text: "Edit Title", menuKey: MenuEvent.editColumn, field, row, col},
+          {text: "Remove Column", menuKey: MenuEvent.removeColumn, field, row, col},
+        );
+      }
+      list.push(
+        {
+          text: "Insert Left",
+          menuKey: MenuEvent.addColumn,
+          children: _.map(menus, function (item) {
+            return {text: item.value, menuKey: `${MenuEvent.addColumn}:-1:${item.key}`, field};
+          })
+        },
+        {
+          text: "Insert Right",
+          menuKey: MenuEvent.addColumn,
+          children: _.map(menus, function (item) {
+            return {text: item.value, menuKey: `${MenuEvent.addColumn}:1:${item.key}`, field};
+          })
+        },
+      );
+      return list
+    }
+    return [];
+  }
+}
 
 export const SheetConfig = function (sheetId?: number | string, disabled: boolean = false, contextMenu?: ContextMenu): object {
   return {
@@ -56,10 +110,13 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
     menu: {
       // 单元格右键菜单
       contextMenuItems: function (field: string, row: number, col: number) {
+        let value: object[] | undefined;
         if (contextMenu) {
-          return contextMenu(field, row, col) || [];
+          value = contextMenu(sheetId, disabled, field, row, col);
+        } else {
+          value = SheetMenuConfig(sheetId, disabled, field, row, col);
         }
-        return [];
+        return value ? value : [];
       },
     },
   }
