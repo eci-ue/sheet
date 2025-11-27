@@ -1,20 +1,28 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { Sheet } from "../src/index";
 import * as api from "./api";
 
+const sheetRef = ref();
 const loading = ref<boolean>();
 
-const onChange = function(){
-
+const onChange = async function(value: object[]){
+  const status = await api.updateCells(value);
+  if (sheetRef.value && sheetRef.value.loadRows) {
+    await sheetRef.value.loadRows();
+  }
 }
 
+onMounted(function() {
+  console.log(sheetRef.value);
+});
 </script>
 
 <template>
   <div class="sheet-ui" :class="{'loading': loading}">
-    <Sheet
+    <Sheet ref="sheetRef"
       v-model:loading="loading"
+      :toolbar="true"
       :sheet-id="api.id"
       :column-list="api.getColumnList"
       :row-list="api.getRowList" @change="onChange"/>

@@ -54,7 +54,7 @@ export default defineConfig(function ({mode}) {
             proxy: {
                 "/api": {
                     changeOrigin: true,
-                    target: 'https://lint.eci.games',
+                    target: 'http://lqc.dev.ecigames.buzz',
                     configure: function (proxy) {
                         proxy.on("proxyReq", function (proxyReq) {
                             // 🟢 在这里添加自定义 Cookie

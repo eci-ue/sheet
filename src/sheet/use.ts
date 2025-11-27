@@ -35,7 +35,7 @@ export const useColumnList = function(sheetRef: Ref<any>, disabled?: boolean, ap
     }
     return [];
   }
-  return useAsyncState<Column[]>(app, initialState, option);
+  return useAsyncState(app, initialState, option);
 }
 
 // 获取表格行数据
@@ -52,5 +52,5 @@ export const useRowList = function(sheetRef: Ref<any>, disabled?: boolean, api?:
     const res = await api();
     return res ? res : [];
   }
-  return useAsyncState<Row[]>(app, initialState, option);
+  return useAsyncState(app, initialState, option);
 }

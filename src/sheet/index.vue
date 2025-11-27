@@ -1,17 +1,18 @@
 <script setup lang="ts">
+import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
-import {SheetConfig} from "./config";
-import {ref, watch, onMounted} from "vue";
-import {CellEditEventName} from "./register";
-import {ListTable, ListColumn} from "@visactor/vue-vtable";
-
+import {onMounted, watch} from "vue";
 import {useColumnList, useRowList} from "./use";
+import {SheetConfig, StyleValue} from "./config";
+import {emitNames, ToolbarEvent, useEvent} from "./event";
+import {Group, ListColumn, ListTable, Text} from "@visactor/vue-vtable";
+
 
 import type {PropType} from "vue";
-import type {EditCellData} from "../types/sheet";
-import type {ColumnList, RowList, ContextMenu} from "../types/prop";
+import type {Cell, Row} from "../types/sheet";
+import type {ColumnList, ContextMenu, RowList} from "../types/prop";
 
-const $emit = defineEmits(["update:loading", "change"]);
+const $emit = defineEmits(["update:loading", ...emitNames]);
 const props = defineProps({
   sheetId: {
     required: false,
@@ -41,10 +42,14 @@ const props = defineProps({
   disabled: {
     required: false,
     type: Boolean as PropType<boolean>,
+  },
+  toolbar: {
+    required: false,
+    type: Boolean as PropType<boolean>,
   }
 });
 
-const sheetRef = ref();
+const {sheetRef, getInstance, bindEvent, toolbarClick} = useEvent();
 
 // 获取行数据
 const {
@@ -85,25 +90,11 @@ const onLoad = function (type?: string) {
   }
 }
 
-const getInstance = function () {
-  if (sheetRef.value?.vTableInstance) {
-    return sheetRef.value.vTableInstance;
-  }
-}
 
-const onSetting = function (type?: string) {
-  console.log(type);
-}
 
 onMounted(function () {
   onLoad();
-  const instance = getInstance();
-  if (!instance) {
-    return;
-  }
-  instance.on(CellEditEventName, function (data: EditCellData) {
-    $emit("change", data);
-  })
+  setTimeout(() => bindEvent($emit));
 });
 
 
@@ -118,7 +109,7 @@ defineExpose({
 
 <template>
   <div class="flex flex-col h-full">
-    <Toolbar @click="onSetting"></Toolbar>
+    <Toolbar v-if="toolbar" @click="toolbarClick"></Toolbar>
     <div class="flex-auto">
       <ListTable ref="sheetRef"
                  :records="rows"
@@ -134,6 +125,30 @@ defineExpose({
                     :editor="column.editor"
                     :options="column.options"
                     :type="column.type">
+          <template #customLayout="{ width, height, record }">
+            <Group :width="width" :height="height" display="flex" align-items="center">
+              <Group :width="width" :height="height" display="flex" align-items="center" :fill="StyleValue(column.columnId, record, ToolbarEvent.Fill)">
+                <template v-if="record[column.columnId] && _.isString(record[column.columnId])">
+                  <Text :text="record[column.columnId]"
+                        :fontSize="14"
+                        fontFamily="sans-serif"
+                        :boundsPadding="[0, 15, 0, 15]"/>
+                </template>
+                <template v-else-if="record[column.columnId]">
+                  <Text :text="record[column.columnId].txt"
+                        :fontSize="14"
+                        :fontVariant="StyleValue(column.columnId, record, ToolbarEvent.Bold)"
+                        :underline="StyleValue(column.columnId, record, ToolbarEvent.Underline)"
+                        :lineThrough="StyleValue(column.columnId, record, ToolbarEvent.Through)"
+                        :fontStyle="StyleValue(column.columnId, record, ToolbarEvent.Italic)"
+                        :fill="StyleValue(column.columnId, record, ToolbarEvent.Font)"
+                        fontFamily="sans-serif"
+                        :boundsPadding="[0, 15, 0, 15]"/>
+                </template>
+              </Group>
+            </Group>
+
+          </template>
         </ListColumn>
       </ListTable>
     </div>

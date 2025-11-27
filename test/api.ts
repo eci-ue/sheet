@@ -1,11 +1,10 @@
-// @ts-ignore
 import * as _ from "lodash-es";
 import {Axios, AxiosResponse} from "axios";
 import safeGet from "@fengqiaogang/safe-get";
 import safeSet from "@fengqiaogang/safe-set";
 
 const axios = new Axios({
-  baseURL: "/api"
+  baseURL: "/api/eci-comic"
 });
 
 const toJson = function<T>(res: AxiosResponse): T | undefined {
@@ -16,12 +15,13 @@ const toJson = function<T>(res: AxiosResponse): T | undefined {
   return safeGet<T>(data, "data");
 }
 
-export const id = 262;
+export const id = 226;
+export const sheetKey = "collectionManageId";
 
 export const getColumnList = async function<T>(): Promise<T | undefined> {
-  const res = await axios.get("/lqa-game/lqaTestCaseFs/getFSHeaderInfo", {
+  const res = await axios.get("/project/settingCollectionTable/getFSHeaderInfo", {
     params: {
-      testManageId: id
+      [sheetKey]: id
     },
     responseType: "json",
   });
@@ -34,11 +34,13 @@ export const toRowList = function<T>(array: T[] = []): T[] {
     const tr = _.omit(item as object, ["tableList"]) as object;
     const row = safeGet<object[]>(item, "tableList") || [];
     for (const cell of row) {
-      const text = safeGet<string>(cell, "txt");
+      const style = safeGet<string>(cell, "cellStyle");
       const columnId = safeGet<string>(cell, "columnId")!;
       if (columnId) {
-        safeSet(tr, columnId, text);
-        safeSet(tr, `${columnId}_cell`, cell);
+        safeSet(tr, columnId, {
+          ...(_.omit(cell, ["cellStyle"])),
+          style: style ? JSON.parse(style) : void 0,
+        });
       }
     }
     list.push(tr as T);
@@ -47,12 +49,31 @@ export const toRowList = function<T>(array: T[] = []): T[] {
 }
 
 export const getRowList = async function<T>(): Promise<T[]> {
-  const res = await axios.get("/lqa-game/lqaTestCaseFs/getFSDataInfo", {
+  const res = await axios.get("/project/settingCollectionTable/getFSDataInfo", {
     params: {
-      testManageId: id
+      [sheetKey]: id
     },
     responseType: "json",
   });
   const list = toJson<T[]>(res);
   return toRowList<T>(list);
+}
+
+export const updateCells = async function(list: object[] = []): Promise<boolean> {
+  const data: object[] = [];
+  for (const item of list) {
+    const style = safeGet<object>(item, "style") || {};
+    data.push({
+      ...item,
+      [sheetKey]: id,
+      cellStyle: JSON.stringify(style),
+    })
+  }
+  const res = await axios.post("/project/settingCollectionTable/insertOrUpdate", JSON.stringify(data), {
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+  return res.status >= 200 && res.status <= 300;
 }

@@ -1,6 +1,9 @@
 
+import {ToolbarEvent} from "./event";
+import safeGet from "@fengqiaogang/safe-get";
 import { merge as customMergeCell } from "./merge";
 
+import type { Cell } from "../types/sheet";
 import type { ContextMenu } from "../types/prop";
 
 export const SheetConfig = function (sheetId?: number | string, disabled: boolean = false, contextMenu?: ContextMenu): object {
@@ -60,4 +63,36 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
       },
     },
   }
+}
+
+export const StyleValue = function (columnId: string, record: object, type: ToolbarEvent): string | number | boolean | undefined {
+  const cell = safeGet<Cell>(record, columnId);
+  if (!cell) {
+    return void 0;
+  }
+  let style: string | number | boolean | undefined;
+  if (cell.style) {
+    const value = safeGet<string | number | boolean>(cell.style, type);
+    if (value) {
+      switch (type) {
+        case ToolbarEvent.Bold:       // 加粗
+          style = 700;
+          break;
+        case ToolbarEvent.Through:    // 中横线
+        case ToolbarEvent.Underline:  // 下划线
+          style = value;
+          break;
+        case ToolbarEvent.Italic:     // 倾斜
+          style = "italic";
+          break;
+        case ToolbarEvent.Font:       // 字体颜色
+          style = value || "black";
+          break;
+        case ToolbarEvent.Fill:       // 背景颜色
+          style = value;
+          break;
+      }
+    }
+  }
+  return style;
 }

@@ -55,6 +55,10 @@ export class Cell {
   x2?: string; // 列结束
   y1?: string; // 行开始
   y2?: string; // 行结束
+  row?: number;
+  column?: number;
+  style?: object;
+  sheetId?: number | string;
 }
 
 export interface RowBasis {
@@ -63,7 +67,7 @@ export interface RowBasis {
 }
 
 export interface RowCells {
-  [key: string]: Cell | string | undefined; // 单元格数据
+  [key: string]: Cell | number | string | undefined; // 单元格数据
 }
 
 /**
@@ -72,9 +76,8 @@ export interface RowCells {
 export type Row = RowBasis & RowCells;
 
 export interface EditCellData{
-  row: number,
-  column: number,
-  sheetId?: string | number,
-  old?: string,
-  value?: string,
+  row: number;
+  column: number;
+  sheetId?: string | number;
+  value: Cell;
 }

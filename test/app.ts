@@ -3,6 +3,7 @@
  * @author svon.me@gmail.com
  */
 
+import "./style.less";
 import Demo from "./demo.vue";
 import { createApp as create } from "vue";
 
