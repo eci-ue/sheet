@@ -75,9 +75,9 @@ export interface RowCells {
  **/
 export type Row = RowBasis & RowCells;
 
-export interface EditCellData{
-  row: number;
-  column: number;
+export class EditCellData{
+  row!: number;
+  column!: number;
   sheetId?: string | number;
-  value: Cell;
+  value!: Cell;
 }

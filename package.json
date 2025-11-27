@@ -10,7 +10,7 @@
     "test": "vite --clearScreen --port 3000",
     "build": "vite build",
     "postbuild": "npm run types",
-    "types": "vue-tsc --declaration --noEmit false --emitDeclarationOnly --declarationDir ./types ./src/index"
+    "types": "node scripts/types.cjs"
   },
   "keywords": [
     "message"
@@ -51,15 +51,16 @@
     "tailwindcss": "^3.2.4",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
-    "typescript": "^4.6.4",
+    "typescript": "^5.9.3",
     "vite": "^7.2.4",
-    "vue": "^3.5.24"
+    "vue": "^3.5.24",
+    "vue-tsc": "^3.1.5",
+    "shelljs": "^0.10.0"
   },
   "files": [
     "src/",
     "dist/",
     "types/",
-    "style/",
     "LICENSE",
     "README.md",
     "package.json"

@@ -26,13 +26,13 @@ export default defineConfig(function ({mode}) {
             }
         },
         build: {
-            target: "modules",
+            target: "esnext",
             polyfillModulePreload: false,
             lib: {
                 entry: "src/index",
-                name: "message",
+                name: "sheet",
                 formats: ["es"],
-                fileName: "message"
+                fileName: "sheet"
             },
             cssCodeSplit: true,
             sourcemap: true,
@@ -41,9 +41,11 @@ export default defineConfig(function ({mode}) {
                 external: [
                     /^pinia/i,
                     /^vue/i,
+                    /^lodash-es/i,
                     /^@visactor/i,
                     /^@fengqiaogang/i,
-                    /^@@vueuse\/core/i
+                    /^@vueuse\/core/i,
+                    /^@ckpack\/vue-color/i,
                 ],
                 output: {
                     inlineDynamicImports: true

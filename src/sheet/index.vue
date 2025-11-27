@@ -9,7 +9,6 @@ import {Group, ListColumn, ListTable, Text} from "@visactor/vue-vtable";
 
 
 import type {PropType} from "vue";
-import type {Cell, Row} from "../types/sheet";
 import type {ColumnList, ContextMenu, RowList} from "../types/prop";
 
 const $emit = defineEmits(["update:loading", ...emitNames]);

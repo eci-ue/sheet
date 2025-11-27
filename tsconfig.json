@@ -28,6 +28,7 @@
       "ESNext",
       "DOM"
     ],
+    "declarationDir": "./types",
     "skipLibCheck": true,
     "noEmit": true,
     "skipDefaultLibCheck": true,
@@ -51,5 +52,6 @@
     "src/**/*.vue",
     "types/**/*.ts",
     "vite.config.ts"
-  ]
+  ],
+  "exclude": ["node_modules", "dist"]
 }
