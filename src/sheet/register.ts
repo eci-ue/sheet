@@ -62,12 +62,8 @@ const MakeCellEditor = function (View: IEditor) {
     public contextValue!: EditContext;
 
     onStart(context: EditContext<any, any>) {
-      const cell = context.value
-      this.rowIndex = context.row;
-      this.columnIndex = context.row;
-      this.cellValue = cell || {};
-      this.sheetId = safeGet<string | number>(context, "table.options.sheetId");
       this.contextValue = context;
+      const cell = (context.value || {}) as Cell;
       return super.onStart({
         ...context,
         value: cell ? cell.txt : void 0
@@ -78,16 +74,17 @@ const MakeCellEditor = function (View: IEditor) {
       if (this.contextValue?.table?.fireListeners) {
         // @ts-ignore
         const txt = this.getValue();
-        const cell = {...this.cellValue, txt};
+        const cell = (this.contextValue.value || {}) as Cell;
+        const sheetId = safeGet<string | number>(this.contextValue, "table.options.sheetId");
         const data: EditCellData = {
-          row: Math.max(this.rowIndex, 0),
-          column: this.columnIndex,
-          sheetId: this.sheetId,
-          value: cell as Cell,
+          sheetId,
+          row: this.contextValue.row,
+          column: this.contextValue.col,
+          value: {...cell, txt},
         }
         this.contextValue.table.fireListeners(CellEventName.Edit, [data]);
       }
-      super.onEnd();
+      return super.onEnd();
     }
   }
 

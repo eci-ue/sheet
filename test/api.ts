@@ -90,3 +90,65 @@ export const addColumn = async function (column: object = {}, columnId?: string,
   })
   return res.status >= 200 && res.status <= 300;
 }
+
+export const removeColumn = async function(columnId: string): Promise<boolean> {
+  const data = {
+    [sheetKey]: id,
+    columnId,
+  };
+  const res = await axios.delete("/project/settingCollectionTable/deleteColumn", {
+    params: data,
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  return res.status >= 200 && res.status <= 300;
+}
+
+export const updateColumn = async function(data: object): Promise<boolean> {
+  const res = await axios.put("/project/settingCollectionTable/changeFSHeaderInfo", JSON.stringify(data), {
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  return res.status >= 200 && res.status <= 300;
+}
+
+export const addRow = async function(count: number = 1, direction: number = 1, rowId?: string): Promise<boolean> {
+  let params: object;
+  if (rowId) {
+    if (count < 0) {
+      // 向上添加
+      params = { [sheetKey]: id, cnt: 1, direction: count, rowId };
+    } else {
+      // 向下添加
+      params = { [sheetKey]: id, cnt: 1, direction: Math.abs(count), rowId };
+    }
+  } else {
+    // 末尾添加
+    params = { [sheetKey]: id, cnt: Math.abs(count) };
+  }
+  const res = await axios.post("/project/settingCollectionTable/addRow", JSON.stringify({}), {
+    params,
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  return res.status >= 200 && res.status <= 300;
+}
+
+export const removeRow = async function(rowIds: string[]): Promise<boolean> {
+  const data = {
+    [sheetKey]: id, rowIds
+  };
+  const res = await axios.post("/project/settingCollectionTable/deleteRow", JSON.stringify(data), {
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  return res.status >= 200 && res.status <= 300;
+}

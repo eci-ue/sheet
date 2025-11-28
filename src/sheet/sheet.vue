@@ -49,7 +49,7 @@ const props = defineProps({
   }
 });
 
-const {sheetRef, getInstance, bindEvent, toolbarClick} = useEvent();
+const {sheetRef, getInstance, bindEvent, toolbarClick, getSelectedCells, clearSelected} = useEvent();
 
 // 获取行数据
 const {
@@ -74,6 +74,7 @@ watch([loadingRow, loadingColumn], () => {
 });
 
 const onLoad = function (type?: string) {
+  clearSelected();
   if (type) {
     if (onLoadRows && type === "row") {
       onLoadRows();
@@ -90,17 +91,16 @@ const onLoad = function (type?: string) {
   }
 }
 
-const onAddColumn = function () {
+// 添加列
+const onAddColumn = _.debounce(function () {
   const data = new Column();
   data.type = CellType.text;
-  data.sheetId = props.sheetId;
-
   $emit("addColumn", {
     column: data,
     direction: 1,
     columnId: void 0,
   })
-}
+}, 300, {leading: true, trailing: false});
 
 
 onMounted(function () {
@@ -110,10 +110,14 @@ onMounted(function () {
 
 
 defineExpose({
-  load: onLoad,
-  loadRows: () => onLoad("row"),
-  loadColumns: () => onLoad("column"),
-  getInstance,
+  rows,          // 内容列表
+  columns,       // 表头列表
+  load: onLoad,  // 整体刷新
+  loadRows: () => onLoad("row"),        // 刷新表格内容
+  loadColumns: () => onLoad("column"),  // 刷新表头内容
+  getInstance,      // 获取表格对象
+  getSelectedCells, // 获取当前选中的单元格内容
+  clearSelected,    // 清除单元格选中状态
 });
 
 </script>
@@ -165,7 +169,8 @@ defineExpose({
                     :disable-select="true" :disable-column-resize="true" :disable-header-select="true"
                     :merge-cell="false">
           <template #headerCustomLayout="{ width, height }">
-            <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center" cursor="pointer" :padding="0" @dblclick="onAddColumn()">
+            <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center"
+                   cursor="pointer" :padding="0" @dblclick="onAddColumn()">
               <Image :image="AddColumnIcon" :width="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"/>
             </Group>
           </template>

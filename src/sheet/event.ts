@@ -1,15 +1,18 @@
 import {ref} from "vue";
 import * as _ from "lodash-es";
+import {MenuEvent} from "./config";
 import {CellEventName} from "./register";
+import * as VTable from "@visactor/vtable";
 import safeGet from "@fengqiaogang/safe-get";
 import safeSet from "@fengqiaogang/safe-set";
+import {CellType, Column} from "../types/sheet";
 
 
 import type {EmitFn} from "vue";
 import type {Cell} from "../types/sheet";
 import type {EditCellData} from "../types/sheet";
 
-export const emitNames = ["change", "addColumn"];
+export const emitNames = ["change", "updateCell", "addColumn", "removeColumn", "editColumn", "addRow", "removeRow"];
 
 export enum ToolbarEvent {
   Clean = "clean",  // 清除样式
@@ -29,12 +32,31 @@ export const useEvent = function () {
     }
   }
 
+  const getSelectedCells = function (): Cell[][] {
+    const instance = getInstance();
+    if (!instance) {
+      return [];
+    }
+    return instance.getSelectedCellInfos();
+  }
+
+  const clearSelected = function() {
+    const instance = getInstance();
+    if (!instance) {
+      return [];
+    }
+    return instance.clearSelected();
+  }
+
   const toolbarClick = function (type: ToolbarEvent, value: string | number | boolean | undefined) {
     const instance = getInstance();
     if (!instance) {
       return;
     }
-    const cells: Cell[][] = instance.getSelectedCellInfos();
+    const cells: Cell[][] = getSelectedCells();
+    if (cells.length < 1) {
+      return;
+    }
     const list: Cell[] = [];
     for (const item of _.flattenDeep(cells)) {
       let style: object;
@@ -69,6 +91,7 @@ export const useEvent = function () {
       return;
     }
     // 单元格编辑事件
+    instance.off(CellEventName.Edit);
     instance.on(CellEventName.Edit, function (list: EditCellData[]) {
       const cells: Cell[] = [];
       for (const item of list) {
@@ -76,15 +99,87 @@ export const useEvent = function () {
           row: item.row,
           column: item.column,
           ...item.value,
-          sheetId: item.sheetId,
         })
       }
-      $emit("change", cells);
+      $emit("updateCell", cells);
     });
+    // 单元格样式编辑事件
+    instance.off(CellEventName.Style);
     instance.on(CellEventName.Style, function (list: Cell[]) {
       $emit("change", list);
     });
-  }
 
-  return {sheetRef, getInstance, bindEvent, toolbarClick};
+
+    // 监听右键菜单点击事件
+    instance.off(VTable.ListTable.EVENT_TYPE.DROPDOWN_MENU_CLICK)
+    instance.on(VTable.ListTable.EVENT_TYPE.DROPDOWN_MENU_CLICK, async function (e: object) {
+      const [key, ...args]: string[] = (safeGet<string>(e, "menuKey") || "").split(":");
+      // 添加列
+      if (key === MenuEvent.addColumn) {
+        const direction = Number(args[0] || 1);
+        const type = String(args[1] || CellType.text);
+        const data = new Column(type as any);
+        $emit("addColumn", {
+          direction,
+          column: data,
+          columnId: void 0,
+        })
+        return;
+      }
+      // 删除列
+      if (key === MenuEvent.removeColumn) {
+        const field = safeGet<string>(e, "field");
+        if (field) {
+          $emit("removeColumn", {columnId: field});
+        }
+        return;
+      }
+      // 删除行
+      if (key === MenuEvent.removeRow) {
+        const cells = getSelectedCells();
+        const keys = new Set<string>();
+        for (const cell of _.flattenDeep(cells)) {
+          const rowId = safeGet<string>(cell, "originData.rowId");
+          if (rowId) {
+            keys.add(rowId)
+          }
+        }
+        $emit("removeRow", [...keys.values()]);
+        return;
+      }
+      // 编辑列
+      if (key === MenuEvent.editColumn) {
+        const field = safeGet<string>(e, "field");
+        if (field) {
+          $emit("editColumn", {columnId: field});
+        }
+        return;
+      }
+      // 清空内容
+      if (key === MenuEvent.emptyCell) {
+        const cells = getSelectedCells();
+        const list: Cell[] = [];
+        for (const item of _.flattenDeep(cells)) {
+          list.push({
+            style: {},
+            txt: "",
+            columnId: safeGet<string>(item, "field")!,
+            rowId: safeGet<string>(item, "originData.rowId")!,
+            x1: void 0,
+            x2: void 0,
+            y1: void 0,
+            y2: void 0,
+          });
+        }
+        $emit("change", list);
+      }
+      // 添加行
+      if (key === MenuEvent.addRow) {
+        const row = safeGet<number>(e, "row");
+        const count = Number(args[0] || 1);
+        $emit("addRow", {row, count});
+      }
+    })
+  }
+  return {getSelectedCells, clearSelected, sheetRef, getInstance, bindEvent, toolbarClick};
 }

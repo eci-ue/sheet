@@ -2,14 +2,15 @@ import * as _ from "lodash-es";
 import {ToolbarEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
 import {merge as customMergeCell} from "./merge";
+import {CellType} from "../types/sheet";
 
 import type {Cell} from "../types/sheet";
 import type {ContextMenu} from "../types/prop";
 
 export const getColumnMenu = function () {
   return [
-    {key: "Text", value: "Text"},
-    {key: "Number", value: "Number"},
+    {key: CellType.text, value: "Text"},
+    {key: CellType.number, value: "Number"},
   ];
 }
 
@@ -31,33 +32,70 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
   // 只在数据行显示菜单，不在表头显示
   if (row === 0) {
     if (col > 0) {
-      const list = [];
-      if (field !== "add_column") {
-        list.push(
-          {text: "Edit Title", menuKey: MenuEvent.editColumn, field, row, col},
-          {text: "Remove Column", menuKey: MenuEvent.removeColumn, field, row, col},
-        );
+      let list: object[];
+      if (field === "add_column") {
+        list = _.map(menus, function (item) {
+          return {text: item.value, menuKey: `${MenuEvent.addColumn}:1:${item.key}`, field};
+        });
+      } else {
+        list = [
+          {text: "Edit column", menuKey: MenuEvent.editColumn, field, row, col},
+          {text: "Delete column", menuKey: MenuEvent.removeColumn, field, row, col},
+          {
+            text: "Insert column left",
+            menuKey: MenuEvent.addColumn,
+            children: _.map(menus, function (item) {
+              return {text: item.value, menuKey: `${MenuEvent.addColumn}:-1:${item.key}`, field};
+            })
+          },
+          {
+            text: "Insert column right",
+            menuKey: MenuEvent.addColumn,
+            children: _.map(menus, function (item) {
+              return {text: item.value, menuKey: `${MenuEvent.addColumn}:1:${item.key}`, field};
+            })
+          }
+        ];
       }
-      list.push(
-        {
-          text: "Insert Left",
-          menuKey: MenuEvent.addColumn,
-          children: _.map(menus, function (item) {
-            return {text: item.value, menuKey: `${MenuEvent.addColumn}:-1:${item.key}`, field};
-          })
-        },
-        {
-          text: "Insert Right",
-          menuKey: MenuEvent.addColumn,
-          children: _.map(menus, function (item) {
-            return {text: item.value, menuKey: `${MenuEvent.addColumn}:1:${item.key}`, field};
-          })
-        },
-      );
       return list
     }
     return [];
   }
+  if (col === 0) {
+    return [
+      {text: "Delete row", menuKey: MenuEvent.removeRow, field, row, col},
+      {
+        text: "Insert row above", menuKey: MenuEvent.addRow, field, row, col,
+        children: [
+          { text: "1 row", menuKey: `${MenuEvent.addRow}:-1`, field, row, col },
+          { text: "5 rows", menuKey: `${MenuEvent.addRow}:-5`, field, row, col, },
+          { text: "10 rows", menuKey: `${MenuEvent.addRow}:-10`, field, row, col, },
+          { text: "20 rows", menuKey: `${MenuEvent.addRow}:-20`, field, row, col, },
+          { text: "50 rows", menuKey: `${MenuEvent.addRow}:-50`, field, row, col, },
+          { text: "100 rows", menuKey: `${MenuEvent.addRow}:-100`, field, row, col, },
+          { text: "200 rows", menuKey: `${MenuEvent.addRow}:-200`, field, row, col, },
+        ]
+      },
+      {
+        text: "Insert row below", menuKey: `${MenuEvent.addRow}:1`, field, row, col,
+        children: [
+          { text: "1 row", menuKey: `${MenuEvent.addRow}:1`, field, row, col },
+          { text: "5 rows", menuKey: `${MenuEvent.addRow}:5`, field, row, col, },
+          { text: "10 rows", menuKey: `${MenuEvent.addRow}:10`, field, row, col, },
+          { text: "20 rows", menuKey: `${MenuEvent.addRow}:20`, field, row, col, },
+          { text: "50 rows", menuKey: `${MenuEvent.addRow}:50`, field, row, col, },
+          { text: "100 rows", menuKey: `${MenuEvent.addRow}:100`, field, row, col, },
+          { text: "200 rows", menuKey: `${MenuEvent.addRow}:200`, field, row, col, },
+        ]
+      },
+    ]
+  }
+  return [
+    // 清空内容
+    {text: "Clear Contents", menuKey: MenuEvent.emptyCell, field, row, col},
+    // 垂直合并
+    {text: "Merge Vertically", menuKey: MenuEvent.merge, field, row, col},
+  ]
 }
 
 export const SheetConfig = function (sheetId?: number | string, disabled: boolean = false, contextMenu?: ContextMenu): object {

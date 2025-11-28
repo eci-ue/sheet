@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ToolbarEvent} from "./event";
 import Color from "./color/index.vue";
+// @ts-ignore
 import CleanIcon from "./icon/clean.svg";
 
 const $emit = defineEmits(["click"]);
