@@ -9,18 +9,18 @@ import safeGet from "@fengqiaogang/safe-get";
 import {Column, Row, Cell} from "../types/sheet";
 
 const getColumn = function (table: object, index: number): Column | undefined {
-  const list = safeGet<Column[]>(table, "options.columns") || [];
+  const list = safeGet<Column[]>(table, "columns") || [];
   return list[index];
 }
 
 const getRow = function (table: object, index: number): Row | undefined {
-  const list = safeGet<Row[]>(table, "options.records") || [];
+  const list = safeGet<Row[]>(table, "records") || [];
   return list[index];
 }
 
 const getColumnIndex = function (table: object, columnId: string): number {
   let index = 0;
-  const list = safeGet<Column[]>(table, "options.columns") || [];
+  const list = safeGet<Column[]>(table, "columns") || [];
   for (let size = _.size(list); index < size; index++) {
     const item = list[index];
     const key = safeGet<string>(item, "field") || safeGet<string>(item, "columnId");
@@ -33,7 +33,7 @@ const getColumnIndex = function (table: object, columnId: string): number {
 
 const getRowIndex = function (table: object, rowId: string): number {
   let index = 0;
-  const list = safeGet<Row[]>(table, "options.records") || [];
+  const list = safeGet<Row[]>(table, "records") || [];
   for (let size = _.size(list); index < size; index++) {
     const item = list[index];
     const key = safeGet<string>(item, "rowId");
@@ -50,7 +50,7 @@ const getCell = function (table: object, col: number, row: number): Cell | undef
   if (columnData && rowData) {
     const columnId = columnData.columnId || safeGet<string>(columnData, "field");
     if (columnId) {
-      const cell = safeGet<Cell>(rowData, `${columnId}_cell`);
+      const cell = safeGet<Cell>(rowData, columnId);
       if (cell) {
         return cell;
       }
@@ -73,6 +73,7 @@ const mergeConfig = function (cell: Cell, table: object) {
 
   return {
     text: cell.txt,
+    dataValue: cell,
     range: {
       start: {
         col: x1 + 1,

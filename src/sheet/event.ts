@@ -6,13 +6,18 @@ import * as VTable from "@visactor/vtable";
 import safeGet from "@fengqiaogang/safe-get";
 import safeSet from "@fengqiaogang/safe-set";
 import {CellType, Column} from "../types/sheet";
+import {Cell} from "../types/sheet";
 
 
 import type {EmitFn} from "vue";
-import type {Cell} from "../types/sheet";
 import type {EditCellData} from "../types/sheet";
 
-export const emitNames = ["change", "updateCell", "addColumn", "removeColumn", "editColumn", "addRow", "removeRow"];
+export const emitNames = [
+  "change", "updateCell",
+  "addColumn", "removeColumn", "editColumn", "widthColumn",
+  "addRow", "removeRow",
+  "move"
+];
 
 export enum ToolbarEvent {
   Clean = "clean",  // 清除样式
@@ -40,7 +45,7 @@ export const useEvent = function () {
     return instance.getSelectedCellInfos();
   }
 
-  const clearSelected = function() {
+  const clearSelected = function () {
     const instance = getInstance();
     if (!instance) {
       return [];
@@ -107,6 +112,28 @@ export const useEvent = function () {
     instance.off(CellEventName.Style);
     instance.on(CellEventName.Style, function (list: Cell[]) {
       $emit("change", list);
+    });
+
+    // 监听列宽调整结束事件
+    instance.off(VTable.ListTable.EVENT_TYPE.RESIZE_COLUMN_END)
+    instance.on(VTable.ListTable.EVENT_TYPE.RESIZE_COLUMN_END, async function (e: object) {
+      const index = safeGet<number>(e, "col") || 0;
+      const colWidths = safeGet<number[]>(e, "colWidths") || [];
+      if (index < 1) {
+        return;
+      }
+      const width = colWidths[index];
+      $emit("widthColumn", {index, width});
+    });
+
+    // 移动事件
+    instance.off(VTable.ListTable.EVENT_TYPE.CHANGE_HEADER_POSITION)
+    instance.on(VTable.ListTable.EVENT_TYPE.CHANGE_HEADER_POSITION, function (event: object) {
+      const startX = safeGet<number>(event, "source.col") || 0;
+      const endX = safeGet<number>(event, "target.col") || 0;
+      const startY = safeGet<number>(event, "source.row") || 0;
+      const endY = safeGet<number>(event, "target.row") || 0;
+      $emit("move", {startX, endX, startY, endY});
     });
 
 
@@ -178,7 +205,61 @@ export const useEvent = function () {
         const row = safeGet<number>(e, "row");
         const count = Number(args[0] || 1);
         $emit("addRow", {row, count});
+        return;
       }
+      // 单元格合并
+      if (key === MenuEvent.merge) {
+        // 单元格合并
+        const map = new Map<number, Cell[]>();
+        const cells = getSelectedCells();
+        for (const tr of cells) {
+          for (let index = 0, size = tr.length; index < size; index++) {
+            let cell = safeGet<Cell>(tr[index], "dataValue") || safeGet<Cell>(tr[index], "value");
+            if (!cell) {
+              cell = new Cell();
+              cell.columnId = safeGet<string>(tr[index], "field")!;
+              cell.rowId = safeGet<string>(tr[index], "originData.rowId")!;
+            }
+            const list: Cell[] = map.get(index) || [];
+            list.push(cell);
+            map.set(index, list);
+          }
+        }
+        const res: Cell[] = [];
+        for (const list of map.values()) {
+          if (list.length < 1) {
+            continue;
+          }
+          const first = _.first(list)!;
+          const last = _.last(list)!;
+          let flag: boolean;
+          let text: string | undefined;
+          if (first.x1 && first.y1) {
+            flag = false;
+            text = first.txt;
+          } else {
+            flag = true;
+            text = first.txt;
+          }
+          for (const item of list) {
+            item.txt = String(text || "");
+            if (flag) {
+              item.x1 = first.columnId;
+              item.y1 = first.rowId;
+              item.x2 = last.columnId;
+              item.y2 = last.rowId;
+            } else {
+              item.x1 = "";
+              item.y1 = "";
+              item.x2 = "";
+              item.y2 = "";
+            }
+            res.push(item);
+          }
+        }
+        $emit("change", res);
+      }
+      return;
     })
   }
   return {getSelectedCells, clearSelected, sheetRef, getInstance, bindEvent, toolbarClick};

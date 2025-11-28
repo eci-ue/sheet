@@ -2,6 +2,7 @@
 import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
 import {onMounted, watch} from "vue";
+// @ts-ignore
 import AddColumnIcon from "./icon/plus.svg";
 import {useColumnList, useRowList} from "./use";
 import {Column, CellType} from "../types/sheet";
@@ -74,7 +75,6 @@ watch([loadingRow, loadingColumn], () => {
 });
 
 const onLoad = function (type?: string) {
-  clearSelected();
   if (type) {
     if (onLoadRows && type === "row") {
       onLoadRows();
@@ -159,7 +159,7 @@ defineExpose({
                         :fontStyle="StyleValue(column.columnId, record, ToolbarEvent.Italic)"
                         :fill="StyleValue(column.columnId, record, ToolbarEvent.Font)"
                         fontFamily="sans-serif"
-                        :boundsPadding="[0, 15, 0, 15]"/>
+                        :boundsPadding="[0, 13, 0, 13]"/>
                 </template>
               </Group>
             </Group>

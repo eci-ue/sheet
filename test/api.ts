@@ -37,10 +37,11 @@ export const toRowList = function <T>(array: T[] = []): T[] {
       const style = safeGet<string>(cell, "cellStyle");
       const columnId = safeGet<string>(cell, "columnId")!;
       if (columnId) {
-        safeSet(tr, columnId, {
+        const data = {
           ...(_.omit(cell, ["cellStyle"])),
           style: style ? JSON.parse(style) : void 0,
-        });
+        };
+        safeSet(tr, columnId, data);
       }
     }
     list.push(tr as T);
@@ -64,7 +65,7 @@ export const updateCells = async function (list: object[] = []): Promise<boolean
   for (const item of list) {
     const style = safeGet<object>(item, "style") || {};
     data.push({
-      ...item,
+      ...(_.omit(item, ["style"])),
       [sheetKey]: id,
       cellStyle: JSON.stringify(style),
     })
@@ -145,6 +146,34 @@ export const removeRow = async function(rowIds: string[]): Promise<boolean> {
     [sheetKey]: id, rowIds
   };
   const res = await axios.post("/project/settingCollectionTable/deleteRow", JSON.stringify(data), {
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  return res.status >= 200 && res.status <= 300;
+}
+
+export const moveColumn = async function(source: string, target: string): Promise<boolean> {
+  const params = {
+    [sheetKey]: id, source, target
+  };
+  const res = await axios.put("/project/settingCollectionTable/moveColumn", JSON.stringify({}), {
+    params,
+    responseType: "json",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  return res.status >= 200 && res.status <= 300;
+}
+
+export const moveRow = async function(source: string, target: string): Promise<boolean> {
+  const params = {
+    [sheetKey]: id, source, target
+  };
+  const res = await axios.put("/project/settingCollectionTable/moveRow", JSON.stringify({}), {
+    params,
     responseType: "json",
     headers: {
       "Content-Type": "application/json"

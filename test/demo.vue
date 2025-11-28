@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as _ from "lodash-es";
 import * as api from "./api";
-import {ref, onMounted} from "vue";
+import {ref} from "vue";
 import {Sheet, fillGenerate} from "../src";
 import safeGet from "@fengqiaogang/safe-get";
 
@@ -98,6 +98,19 @@ const onEditColumn = async function (data: object) {
   }
 }
 
+// 修改列宽
+const onWidthColumn = async function (data: object) {
+  const width = safeGet<number>(data, "width") || 0;
+  const index = safeGet<number>(data, "index")!;
+  const columns: Column[] = sheetRef.value?.columns || [];
+  const column = columns[index - 1];
+  column.width = width < 120 ? 120 : width;
+  const status = await api.updateColumn(column);
+  if (status && sheetRef.value && sheetRef.value.loadRows) {
+    await sheetRef.value.loadColumns();
+  }
+}
+
 const onAddRow = async function (data: object) {
   const rows: Row[] = sheetRef.value?.rows || [];
   const index = safeGet<number>(data, "row");
@@ -115,10 +128,39 @@ const onAddRow = async function (data: object) {
   }
 }
 
-const onRemoveRow = async function(rowIds: string[]) {
+const onRemoveRow = async function (rowIds: string[]) {
   const status = await api.removeRow(rowIds);
   if (status && sheetRef.value && sheetRef.value.loadRows) {
     await sheetRef.value.loadRows();
+  }
+}
+
+// 移动事件
+const onMove = async function (data: object) {
+  const startX = safeGet<number>(data, "startX") || 0;
+  const endX = safeGet<number>(data, "endX") || 0;
+  const startY = safeGet<number>(data, "startY") || 0;
+  const endY = safeGet<number>(data, "endY") || 0;
+  if (startY === 0 && endY === 0) {
+    const start = startX - 1;
+    const end = endX - 1;
+    if (start >= 0 && end >= 0) {
+      const columns: Column[] = sheetRef.value?.columns || [];
+      const source = columns[start].columnId;
+      const target = columns[end].columnId;
+      if (source && target) {
+        await api.moveColumn(source, target)
+      }
+    }
+    return;
+  }
+  if (startX === 0 && endX === 0) {
+    const start = startY - 1;
+    const end = endY - 1;
+    if (start >= 0 && end >= 0) {
+      await api.moveRow(String(start), String(end));
+    }
+    return;
   }
 }
 
@@ -132,11 +174,13 @@ const onRemoveRow = async function(rowIds: string[]) {
            :sheet-id="api.id"
            :column-list="api.getColumnList"
            :row-list="api.getRowList"
+           @move="onMove"
            @change="onChange"
            @updateCell="onUpdateCell"
            @addColumn="onAddColumn"
            @removeColumn="onRemoveColumn"
            @editColumn="onEditColumn"
+           @widthColumn="onWidthColumn"
            @addRow="onAddRow"
            @removeRow="onRemoveRow"/>
   </div>
