@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ToolbarEvent} from "./event";
+import {ToolbarEvent} from "./config";
 import Color from "./color/index.vue";
 // @ts-ignore
 import CleanIcon from "./icon/clean.svg";

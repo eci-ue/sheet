@@ -1,12 +1,12 @@
 import {ref} from "vue";
 import * as _ from "lodash-es";
-import {MenuEvent} from "./config";
+import {Cell} from "../types/sheet";
 import {CellEventName} from "./register";
 import * as VTable from "@visactor/vtable";
 import safeGet from "@fengqiaogang/safe-get";
 import safeSet from "@fengqiaogang/safe-set";
 import {CellType, Column} from "../types/sheet";
-import {Cell} from "../types/sheet";
+import {MenuEvent, ToolbarEvent} from "./config";
 
 
 import type {EmitFn} from "vue";
@@ -19,15 +19,6 @@ export const emitNames = [
   "move"
 ];
 
-export enum ToolbarEvent {
-  Clean = "clean",  // 清除样式
-  Bold = "bold",  // 加粗
-  Italic = "italic",  // 倾斜
-  Through = "through",  // 删除线
-  Underline = "underline",  // 下划线
-  Font = "font", // 字体演示
-  Fill = "fill", // 背景色填充
-}
 
 export const useEvent = function () {
   const sheetRef = ref();

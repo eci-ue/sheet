@@ -1,5 +1,4 @@
 import * as _ from "lodash-es";
-import {ToolbarEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
 import {Cell, CellType} from "../types/sheet";
 import {merge as customMergeCell} from "./merge";
@@ -40,6 +39,16 @@ export const getColumnMenu = function () {
     {key: CellType.text, value: "Text"},
     {key: CellType.number, value: "Number"},
   ];
+}
+
+export enum ToolbarEvent {
+  Clean = "clean",  // 清除样式
+  Bold = "bold",  // 加粗
+  Italic = "italic",  // 倾斜
+  Through = "through",  // 删除线
+  Underline = "underline",  // 下划线
+  Font = "font", // 字体演示
+  Fill = "fill", // 背景色填充
 }
 
 export enum MenuEvent {
@@ -188,37 +197,6 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
   }
 }
 
-export const StyleValue = function (columnId: string, record: object, type: ToolbarEvent): string | number | boolean | undefined {
-  const cell = safeGet<Cell>(record, columnId);
-  if (!cell) {
-    return void 0;
-  }
-  let style: string | number | boolean | undefined;
-  if (cell.style) {
-    const value = safeGet<string | number | boolean>(cell.style, type);
-    if (value) {
-      switch (type) {
-        case ToolbarEvent.Bold:       // 加粗
-          style = 700;
-          break;
-        case ToolbarEvent.Through:    // 中横线
-        case ToolbarEvent.Underline:  // 下划线
-          style = value;
-          break;
-        case ToolbarEvent.Italic:     // 倾斜
-          style = "italic";
-          break;
-        case ToolbarEvent.Font:       // 字体颜色
-          style = value || "black";
-          break;
-        case ToolbarEvent.Fill:       // 背景颜色
-          style = value;
-          break;
-      }
-    }
-  }
-  return style;
-}
 
 export const GetCell = function (columns: Column[] = [], rows: Row[] = [], columnIndex: number, rowIndex: number): Cell | undefined {
   const column = columns[columnIndex];
