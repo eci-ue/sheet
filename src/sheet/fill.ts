@@ -4,6 +4,8 @@
  **/
 
 import * as _ from "lodash-es";
+import {GetCell} from "./config";
+import type {FillCellOption, Column, Row, Cell} from "../types/sheet";
 
 const nextLetter = function (str: string = "a", step: number = 1): string {
   if (!/^[A-Za-z]+$/.test(str)) throw new Error("只允许 A-Z 或 a-z 字母组成");
@@ -54,4 +56,34 @@ export const fillGenerateValue = function (value: string, row: number): string {
   } else {
     return value;
   }
+}
+
+export const fillCellCompute = function (option: FillCellOption, columns: Column[] = [], rows: Row[] = []) {
+  const list: Cell[] = [];
+  if (option.startRow < option.endRow) {
+    // 从上往下填充
+    for (let row = option.startRow + 1, index = 1; row <= option.endRow; row++, index++) {
+      for (let col = option.startCol; col <= option.endCol; col++) {
+        const origin = GetCell(columns, rows, col - 1, option.startRow - 1);
+        const cell = GetCell(columns, rows, col - 1, row - 1);
+        if (cell) {
+          cell.txt = fillGenerateValue(origin?.txt || "", index);
+          list.push(cell);
+        }
+      }
+    }
+  } else {
+    // 从下往上填充
+    for (let row = option.startRow - 1, index = 0; row >= option.endRow; row--, index--) {
+      for (let col = option.startCol; col <= option.endCol; col++) {
+        const origin = GetCell(columns, rows, col - 1, option.startRow - 1);
+        const cell = GetCell(columns, rows, col - 1, row - 1);
+        if (cell) {
+          cell.txt = fillGenerateValue(origin?.txt || "", index - 1);
+          list.push(cell);
+        }
+      }
+    }
+  }
+  return list;
 }

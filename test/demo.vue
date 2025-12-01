@@ -2,10 +2,10 @@
 import * as _ from "lodash-es";
 import * as api from "./api";
 import {ref} from "vue";
-import {Sheet, fillGenerate} from "../src";
 import safeGet from "@fengqiaogang/safe-get";
+import {Sheet, fillGenerate, fillCellCompute} from "../src";
 
-import type {Column, Row, Cell} from "../src";
+import type {Column, Row, Cell, FillCellOption} from "../src";
 
 const sheetRef = ref();
 const loading = ref<boolean>();
@@ -164,6 +164,16 @@ const onMove = async function (data: object) {
   }
 }
 
+// 单元格填充
+const onFillCell = function (value: FillCellOption) {
+  if (sheetRef.value) {
+    const res = fillCellCompute(value, sheetRef.value.columns, sheetRef.value.rows);
+    if (res && res.length > 0) {
+      return onUpdateCell(res);
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -182,7 +192,8 @@ const onMove = async function (data: object) {
            @editColumn="onEditColumn"
            @widthColumn="onWidthColumn"
            @addRow="onAddRow"
-           @removeRow="onRemoveRow"/>
+           @removeRow="onRemoveRow"
+           @fillCell="onFillCell"/>
   </div>
 </template>
 

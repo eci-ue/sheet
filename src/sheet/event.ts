@@ -13,7 +13,7 @@ import type {EmitFn} from "vue";
 import type {EditCellData} from "../types/sheet";
 
 export const emitNames = [
-  "change", "updateCell",
+  "change", "updateCell", "fillCell",
   "addColumn", "removeColumn", "editColumn", "widthColumn",
   "addRow", "removeRow",
   "move"
@@ -42,7 +42,24 @@ export const useEvent = function () {
     if (!instance) {
       return [];
     }
-    return instance.getSelectedCellInfos();
+    const list: Cell[][] = [];
+    const cells = instance.getSelectedCellInfos();
+    for (const array of cells) {
+      const rows: Cell[] = [];
+      for (const item of array) {
+        const value = safeGet<Cell | string | undefined>(item, "value");
+        if (_.isNil(value) || _.isString(value) || _.isNumber(value)) {
+          const cell = new Cell();
+          cell.columnId = safeGet<string>(item, "field")!;
+          cell.rowId = safeGet<string>(item, "originData.rowId")!;
+          cell.txt = value as string;
+          item.value = cell;
+        }
+        rows.push(item);
+      }
+      list.push(rows);
+    }
+    return list;
   }
 
   const clearSelected = function () {
@@ -138,7 +155,7 @@ export const useEvent = function () {
 
 
     // 监听右键菜单点击事件
-    instance.off(VTable.ListTable.EVENT_TYPE.DROPDOWN_MENU_CLICK)
+    instance.off(VTable.ListTable.EVENT_TYPE.DROPDOWN_MENU_CLICK);
     instance.on(VTable.ListTable.EVENT_TYPE.DROPDOWN_MENU_CLICK, async function (e: object) {
       const [key, ...args]: string[] = (safeGet<string>(e, "menuKey") || "").split(":");
       // 添加列
@@ -209,18 +226,12 @@ export const useEvent = function () {
       }
       // 单元格合并
       if (key === MenuEvent.merge) {
-        // 单元格合并
-        const map = new Map<number, Cell[]>();
         const cells = getSelectedCells();
+        const map = new Map<number, Cell[]>();
         for (const tr of cells) {
           for (let index = 0, size = tr.length; index < size; index++) {
-            let cell = safeGet<Cell>(tr[index], "dataValue") || safeGet<Cell>(tr[index], "value");
-            if (!cell) {
-              cell = new Cell();
-              cell.columnId = safeGet<string>(tr[index], "field")!;
-              cell.rowId = safeGet<string>(tr[index], "originData.rowId")!;
-            }
             const list: Cell[] = map.get(index) || [];
+            let cell = safeGet<Cell>(tr[index], "value")!;
             list.push(cell);
             map.set(index, list);
           }
@@ -260,7 +271,73 @@ export const useEvent = function () {
         $emit("change", res);
       }
       return;
-    })
+    });
+
+
+    // 填充功能
+    // 记录 拖拽填充柄之前的选中范围
+    let beforeDragMaxCol: number;
+    let beforeDragMinCol: number;
+    let beforeDragMaxRow: number;
+    let beforeDragMinRow: number;
+    instance.off(VTable.ListTable.EVENT_TYPE.MOUSEDOWN_FILL_HANDLE);
+    instance.on(VTable.ListTable.EVENT_TYPE.MOUSEDOWN_FILL_HANDLE, function () {
+      // @ts-ignore
+      const startSelectCellRange = instance.getSelectedCellRanges()[0];
+      beforeDragMaxCol = Math.max(startSelectCellRange.start.col, startSelectCellRange.end.col);
+      beforeDragMinCol = Math.min(startSelectCellRange.start.col, startSelectCellRange.end.col);
+      beforeDragMaxRow = Math.max(startSelectCellRange.start.row, startSelectCellRange.end.row);
+      beforeDragMinRow = Math.min(startSelectCellRange.start.row, startSelectCellRange.end.row);
+    });
+    instance.off(VTable.ListTable.EVENT_TYPE.DRAG_FILL_HANDLE_END);
+    instance.on(VTable.ListTable.EVENT_TYPE.DRAG_FILL_HANDLE_END, (e: object) => {
+      const direction = safeGet<string>(e, "direction")!;
+      let startChangeCellCol!: number;
+      let startChangeCellRow!: number;
+      let endChangeCellCol!: number;
+      let endChangeCellRow!: number;
+      // @ts-ignore
+      const endSelectCellRange = instance.getSelectedCellRanges()[0];
+      //根据填充方向 确定需要填充值的范围
+      if (direction === 'bottom') {
+        startChangeCellCol = beforeDragMinCol;
+        startChangeCellRow = beforeDragMaxRow + 1;
+        endChangeCellCol = beforeDragMaxCol;
+        endChangeCellRow = endSelectCellRange.end.row;
+      } else if (direction === 'right') {
+        startChangeCellCol = beforeDragMaxCol + 1;
+        startChangeCellRow = beforeDragMinRow;
+        endChangeCellCol = endSelectCellRange.end.col;
+        endChangeCellRow = beforeDragMaxRow;
+      } else if (direction === 'top') {
+        startChangeCellCol = beforeDragMinCol;
+        startChangeCellRow = beforeDragMinRow - 1;
+        endChangeCellCol = beforeDragMaxCol;
+        endChangeCellRow = endSelectCellRange.end.row;
+      } else if (direction === 'left') {
+        startChangeCellCol = beforeDragMinCol - 1;
+        startChangeCellRow = beforeDragMinRow;
+        endChangeCellCol = endSelectCellRange.end.col;
+        endChangeCellRow = beforeDragMaxRow;
+      }
+      return changeTableValues(startChangeCellCol, startChangeCellRow, endChangeCellCol, endChangeCellRow);
+    });
+
+    const changeTableValues = function (startChangeCellCol: number, startChangeCellRow: number, endChangeCellCol: number, endChangeCellRow: number) {
+      let startRow: number;
+      let endRow: number;
+      const startCol = Math.min(startChangeCellCol, endChangeCellCol);
+      const endCol = Math.max(startChangeCellCol, endChangeCellCol);
+      if (startChangeCellRow < endChangeCellRow) {
+        startRow = Math.min(startChangeCellRow, endChangeCellRow) - 1;
+        endRow = Math.max(startChangeCellRow, endChangeCellRow);
+      } else {
+        startRow = Math.max(startChangeCellRow, endChangeCellRow) + 1;
+        endRow = Math.min(startChangeCellRow, endChangeCellRow);
+      }
+      // 单元格填充事件
+      $emit("fillCell", {startRow, endRow, startCol, endCol});
+    }
   }
   return {getSelectedCells, clearSelected, sheetRef, getInstance, bindEvent, toolbarClick};
 }

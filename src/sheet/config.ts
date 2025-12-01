@@ -1,11 +1,11 @@
 import * as _ from "lodash-es";
 import {ToolbarEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
+import {Cell, CellType} from "../types/sheet";
 import {merge as customMergeCell} from "./merge";
-import {CellType} from "../types/sheet";
 
-import type {Cell} from "../types/sheet";
 import type {ContextMenu} from "../types/prop";
+import type {Column, Row} from "../types/sheet";
 
 export const getColumnMenu = function () {
   return [
@@ -67,25 +67,25 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
       {
         text: "Insert row above", menuKey: MenuEvent.addRow, field, row, col,
         children: [
-          { text: "1 row", menuKey: `${MenuEvent.addRow}:-1`, field, row, col },
-          { text: "5 rows", menuKey: `${MenuEvent.addRow}:-5`, field, row, col, },
-          { text: "10 rows", menuKey: `${MenuEvent.addRow}:-10`, field, row, col, },
-          { text: "20 rows", menuKey: `${MenuEvent.addRow}:-20`, field, row, col, },
-          { text: "50 rows", menuKey: `${MenuEvent.addRow}:-50`, field, row, col, },
-          { text: "100 rows", menuKey: `${MenuEvent.addRow}:-100`, field, row, col, },
-          { text: "200 rows", menuKey: `${MenuEvent.addRow}:-200`, field, row, col, },
+          {text: "1 row", menuKey: `${MenuEvent.addRow}:-1`, field, row, col},
+          {text: "5 rows", menuKey: `${MenuEvent.addRow}:-5`, field, row, col,},
+          {text: "10 rows", menuKey: `${MenuEvent.addRow}:-10`, field, row, col,},
+          {text: "20 rows", menuKey: `${MenuEvent.addRow}:-20`, field, row, col,},
+          {text: "50 rows", menuKey: `${MenuEvent.addRow}:-50`, field, row, col,},
+          {text: "100 rows", menuKey: `${MenuEvent.addRow}:-100`, field, row, col,},
+          {text: "200 rows", menuKey: `${MenuEvent.addRow}:-200`, field, row, col,},
         ]
       },
       {
         text: "Insert row below", menuKey: `${MenuEvent.addRow}:1`, field, row, col,
         children: [
-          { text: "1 row", menuKey: `${MenuEvent.addRow}:1`, field, row, col },
-          { text: "5 rows", menuKey: `${MenuEvent.addRow}:5`, field, row, col, },
-          { text: "10 rows", menuKey: `${MenuEvent.addRow}:10`, field, row, col, },
-          { text: "20 rows", menuKey: `${MenuEvent.addRow}:20`, field, row, col, },
-          { text: "50 rows", menuKey: `${MenuEvent.addRow}:50`, field, row, col, },
-          { text: "100 rows", menuKey: `${MenuEvent.addRow}:100`, field, row, col, },
-          { text: "200 rows", menuKey: `${MenuEvent.addRow}:200`, field, row, col, },
+          {text: "1 row", menuKey: `${MenuEvent.addRow}:1`, field, row, col},
+          {text: "5 rows", menuKey: `${MenuEvent.addRow}:5`, field, row, col,},
+          {text: "10 rows", menuKey: `${MenuEvent.addRow}:10`, field, row, col,},
+          {text: "20 rows", menuKey: `${MenuEvent.addRow}:20`, field, row, col,},
+          {text: "50 rows", menuKey: `${MenuEvent.addRow}:50`, field, row, col,},
+          {text: "100 rows", menuKey: `${MenuEvent.addRow}:100`, field, row, col,},
+          {text: "200 rows", menuKey: `${MenuEvent.addRow}:200`, field, row, col,},
         ]
       },
     ]
@@ -190,4 +190,21 @@ export const StyleValue = function (columnId: string, record: object, type: Tool
     }
   }
   return style;
+}
+
+export const GetCell = function (columns: Column[] = [], rows: Row[] = [], columnIndex: number, rowIndex: number): Cell | undefined {
+  const column = columns[columnIndex];
+  const row = rows[rowIndex];
+  if (!column || !row) {
+    return void 0;
+  }
+  const cell = safeGet<Cell>(row, column.columnId);
+  if (cell) {
+    return cell;
+  } else {
+    const data = new Cell();
+    data.rowId = row.rowId;
+    data.columnId = column.columnId;
+    return data;
+  }
 }

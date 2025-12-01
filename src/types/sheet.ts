@@ -14,6 +14,7 @@ export enum CellType {
 export class OptionKV {
   public dictLabel: string;
   public parent?: string | number;
+
   constructor(label: string, parent?: string | number) {
     // 名称
     this.dictLabel = label;
@@ -74,9 +75,16 @@ export interface RowCells {
  **/
 export type Row = RowBasis & RowCells;
 
-export class EditCellData{
+export class EditCellData {
   row!: number;
   column!: number;
   sheetId?: string | number;
   value!: Cell;
+}
+
+export interface FillCellOption {
+  startRow: number;
+  endRow: number;
+  startCol: number;
+  endCol: number;
 }
