@@ -174,6 +174,16 @@ const onFillCell = function (value: FillCellOption) {
   }
 }
 
+// 查看文件
+const onShowFile = function (cell: Cell) {
+  console.log(cell);
+}
+
+// @上传文件
+const onUpload = function (cell: Cell) {
+  console.log(cell);
+}
+
 </script>
 
 <template>
@@ -193,7 +203,9 @@ const onFillCell = function (value: FillCellOption) {
            @widthColumn="onWidthColumn"
            @addRow="onAddRow"
            @removeRow="onRemoveRow"
-           @fillCell="onFillCell"/>
+           @fillCell="onFillCell"
+           @clickFile="onShowFile"
+           @upload="onUpload"/>
   </div>
 </template>
 

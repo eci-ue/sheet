@@ -4,8 +4,36 @@ import safeGet from "@fengqiaogang/safe-get";
 import {Cell, CellType} from "../types/sheet";
 import {merge as customMergeCell} from "./merge";
 
+// @ts-ignore
+import AddColumnIcon from "./icon/plus.svg";
+// @ts-ignore
+import UploadIcon from "./icon/upload.svg";
+// @ts-ignore
+import AutoIcon from "./icon/default.svg";
+// @ts-ignore
+import DocIcon from "./icon/docx.svg";
+// @ts-ignore
+import ImageIcon from "./icon/jpg.svg";
+// @ts-ignore
+import MusicIcon from "./icon/music.svg";
+// @ts-ignore
+import VideoIcon from "./icon/video.svg";
+// @ts-ignore
+import ZipIcon from "./icon/zip.svg";
+
 import type {ContextMenu} from "../types/prop";
 import type {Column, Row} from "../types/sheet";
+
+export const Icon = {
+  plus: AddColumnIcon,
+  upload: UploadIcon,
+  auto: AutoIcon,
+  zip: ZipIcon,
+  video: VideoIcon,
+  image: ImageIcon,
+  music: MusicIcon,
+  doc: DocIcon,
+}
 
 export const getColumnMenu = function () {
   return [

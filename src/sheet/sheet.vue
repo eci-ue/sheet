@@ -2,18 +2,19 @@
 import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
 import {onMounted, watch} from "vue";
-// @ts-ignore
-import AddColumnIcon from "./icon/plus.svg";
+import safeGet from "@fengqiaogang/safe-get";
 import {useColumnList, useRowList} from "./use";
-import {Column, CellType} from "../types/sheet";
-import {SheetConfig, StyleValue} from "./config";
+import {Column, CellType, Cell} from "../types/sheet";
+import {SheetConfig, StyleValue, Icon} from "./config";
 import {emitNames, ToolbarEvent, useEvent} from "./event";
 import {Group, ListColumn, ListTable, Text, Image} from "@visactor/vue-vtable";
+import * as preview from "../util/preview";
 
 import type {PropType} from "vue";
+import type {Row} from "../types/sheet";
 import type {ColumnList, ContextMenu, RowList} from "../types/prop";
 
-const $emit = defineEmits(["update:loading", ...emitNames]);
+const $emit = defineEmits(["update:loading", "clickFile", "upload", ...emitNames]);
 const props = defineProps({
   sheetId: {
     required: false,
@@ -102,6 +103,33 @@ const onAddColumn = _.debounce(function () {
   })
 }, 300, {leading: true, trailing: false});
 
+const onFileUpload = function (column: Column, record: Row) {
+  if (props.disabled) {
+    return;
+  }
+  const cell = safeGet<Cell>(record, column.columnId);
+  if (cell && cell.txt) {
+    $emit("upload", cell);
+  } else {
+    const tmp = new Cell();
+    tmp.rowId = record.rowId;
+    tmp.columnId = column.columnId;
+    $emit("upload", tmp);
+  }
+}
+
+const onFileShow = function (column: Column, record: Row) {
+  if (props.disabled) {
+    return;
+  }
+  const cell = safeGet<Cell>(record, column.columnId);
+  if (cell && cell.txt) {
+    $emit("clickFile", cell);
+  } else {
+    return onFileUpload(column, record);
+  }
+}
+
 
 onMounted(function () {
   onLoad();
@@ -141,7 +169,35 @@ defineExpose({
                     :options="column.options"
                     :type="column.type">
           <template #customLayout="{ width, height, record }">
-            <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center">
+            <Group v-if="column.type === CellType.file || column.type === CellType.image"
+                   :width="width"
+                   :height="height"
+                   display="flex"
+                   align-items="center">
+              <template v-if="record[column.columnId] && preview.isImage(record[column.columnId].txt)">
+                <Image cursor="pointer" :image="record[column.columnId].txt" :width="20" :height="20"
+                       :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+              </template>
+              <template v-else-if="record[column.columnId] && preview.isAudio(record[column.columnId].txt)">
+                <Image cursor="pointer" :image="Icon.auto" :width="20" :height="20"
+                       :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+              </template>
+              <template v-else-if="record[column.columnId] && preview.isVideo(record[column.columnId].txt)">
+                <Image cursor="pointer" :image="Icon.video" :width="20" :height="20"
+                       :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+              </template>
+              <template v-else-if="record[column.columnId] && preview.isZip(record[column.columnId].txt)">
+                <Image cursor="pointer" :image="Icon.zip" :width="20" :height="20"
+                       :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+              </template>
+              <template v-else-if="record[column.columnId] && record[column.columnId].txt">
+                <Image cursor="pointer" :image="Icon.auto" :width="20" :height="20"
+                       :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+              </template>
+              <Image :image="Icon.upload" :width="20" :height="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"
+                     @click="onFileUpload(column, record)"/>
+            </Group>
+            <Group v-else :width="width" :height="height">
               <Group :width="width - 2" :height="height - 2" display="flex" align-items="center"
                      :fill="StyleValue(column.columnId, record, ToolbarEvent.Fill)">
                 <template v-if="record[column.columnId] && _.isString(record[column.columnId])">
@@ -171,7 +227,7 @@ defineExpose({
           <template #headerCustomLayout="{ width, height }">
             <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center"
                    cursor="pointer" :padding="0" @dblclick="onAddColumn()">
-              <Image :image="AddColumnIcon" :width="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"/>
+              <Image :image="Icon.plus" :width="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"/>
             </Group>
           </template>
         </ListColumn>
