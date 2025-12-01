@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
-import {onMounted, watch} from "vue";
+import {onMounted, watch, ref} from "vue";
 import safeGet from "@fengqiaogang/safe-get";
 import {useColumnList, useRowList} from "./use";
 import {Column, CellType, Cell} from "../types/sheet";
@@ -51,6 +51,8 @@ const props = defineProps({
   }
 });
 
+const fileRef = ref();
+const imageRef = ref();
 const {sheetRef, getInstance, bindEvent, toolbarClick, getSelectedCells, clearSelected} = useEvent();
 
 // 获取行数据
@@ -103,18 +105,35 @@ const onAddColumn = _.debounce(function () {
   })
 }, 300, {leading: true, trailing: false});
 
+let onFileSelect: any = () => void 0;
+
 const onFileUpload = function (column: Column, record: Row) {
   if (props.disabled) {
     return;
   }
-  const cell = safeGet<Cell>(record, column.columnId);
-  if (cell && cell.txt) {
-    $emit("upload", cell);
+  let cell = safeGet<Cell>(record, column.columnId);
+  if (!cell) {
+    cell = new Cell();
+    cell.rowId = record.rowId;
+    cell.columnId = column.columnId;
+  }
+
+  onFileSelect = function (e: Event) {
+    const dom = e.target as HTMLInputElement;
+    const file = (dom.files || [])[0];  // 获取 File 对象
+    if (file) {
+      const callback = function () {
+        dom.value = "";
+      }
+      $emit("upload", {cell, file, callback});
+    }
+  }
+  if (column.type === CellType.image) {
+    const dom = imageRef.value;
+    dom.click();
   } else {
-    const tmp = new Cell();
-    tmp.rowId = record.rowId;
-    tmp.columnId = column.columnId;
-    $emit("upload", tmp);
+    const dom = fileRef.value;
+    dom.click();
   }
 }
 
@@ -154,6 +173,10 @@ defineExpose({
   <div class="flex flex-col h-full">
     <Toolbar v-if="toolbar" @click="toolbarClick"></Toolbar>
     <div class="flex-auto">
+      <div style="display: none">
+        <input type="file" ref="fileRef" @change="onFileSelect"/>
+        <input type="file" accept="image/*" ref="imageRef" @change="onFileSelect"/>
+      </div>
       <ListTable ref="sheetRef"
                  :records="rows"
                  :options="config || SheetConfig(sheetId, disabled, contextMenu)"
@@ -167,7 +190,8 @@ defineExpose({
                     :merge-cell="false"
                     :editor="column.editor"
                     :options="column.options"
-                    :type="column.type">
+                    :type="column.type"
+                    cellType="text" :style="{ autoWrapText: true }">
           <template #customLayout="{ width, height, record }">
             <Group v-if="column.type === CellType.file || column.type === CellType.image"
                    :width="width"
@@ -197,27 +221,26 @@ defineExpose({
               <Image :image="Icon.upload" :width="20" :height="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"
                      @click="onFileUpload(column, record)"/>
             </Group>
-            <Group v-else :width="width" :height="height">
-              <Group :width="width - 2" :height="height - 2" display="flex" align-items="center"
-                     :fill="StyleValue(column.columnId, record, ToolbarEvent.Fill)">
-                <template v-if="record[column.columnId] && _.isString(record[column.columnId])">
-                  <Text :text="record[column.columnId]"
-                        :fontSize="14"
-                        fontFamily="sans-serif"
-                        :boundsPadding="[0, 13, 0, 13]"/>
-                </template>
-                <template v-else-if="record[column.columnId]">
-                  <Text :text="record[column.columnId].txt"
-                        :fontSize="14"
-                        :fontVariant="StyleValue(column.columnId, record, ToolbarEvent.Bold)"
-                        :underline="StyleValue(column.columnId, record, ToolbarEvent.Underline)"
-                        :lineThrough="StyleValue(column.columnId, record, ToolbarEvent.Through)"
-                        :fontStyle="StyleValue(column.columnId, record, ToolbarEvent.Italic)"
-                        :fill="StyleValue(column.columnId, record, ToolbarEvent.Font)"
-                        fontFamily="sans-serif"
-                        :boundsPadding="[0, 13, 0, 13]"/>
-                </template>
-              </Group>
+            <Group v-else :width="width" :fill="StyleValue(column.columnId, record, ToolbarEvent.Fill)">
+              <template v-if="record[column.columnId] && _.isString(record[column.columnId])">
+                <Text :text="record[column.columnId]"
+                      :fontSize="14"
+                      fontFamily="sans-serif"
+                      :boundsPadding="[0, 13, 0, 13]"/>
+              </template>
+              <template v-else-if="record[column.columnId]">
+                <Text :text="record[column.columnId].txt"
+                      :fontSize="14"
+                      :fontVariant="StyleValue(column.columnId, record, ToolbarEvent.Bold)"
+                      :underline="StyleValue(column.columnId, record, ToolbarEvent.Underline)"
+                      :lineThrough="StyleValue(column.columnId, record, ToolbarEvent.Through)"
+                      :fontStyle="StyleValue(column.columnId, record, ToolbarEvent.Italic)"
+                      :fill="StyleValue(column.columnId, record, ToolbarEvent.Font)"
+                      fontFamily="sans-serif"
+                      :lineHeight="22"
+                      :autoWrapText="true"
+                      :boundsPadding="[0, 13, 0, 13]"/>
+              </template>
             </Group>
           </template>
         </ListColumn>
