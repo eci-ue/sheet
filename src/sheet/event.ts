@@ -76,7 +76,7 @@ export const useEvent = function () {
       if (type === ToolbarEvent.Clean) {
         style = {};
       } else {
-        style = safeGet<object>(item, "value.style") || {};
+        style = (safeGet<object>(item, "value.style") || safeGet<object>(item, "dataValue.style")) || {};
         if (_.hasIn(style, type)) {
           style = _.omit(style, [type]);
         } else {
