@@ -172,7 +172,12 @@ defineExpose({
 
 <template>
   <div class="flex flex-col h-full">
-    <Toolbar v-if="toolbar" @click="toolbarClick"></Toolbar>
+    <div class="flex items-center gap-x-5">
+      <Toolbar v-if="toolbar" @click="toolbarClick"></Toolbar>
+      <div class="flex-1">
+        <slot name="toolbar"></slot>
+      </div>
+    </div>
     <div class="flex-auto">
       <div style="display: none">
         <input type="file" ref="fileRef" @change="onFileSelect"/>

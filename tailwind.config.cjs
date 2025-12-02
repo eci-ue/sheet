@@ -7,6 +7,7 @@ module.exports = {
   content: [
     './*.html',
     './src/**/*.{vue,js,jsx,ts,tsx,html}',
+    './test/**/*.{vue,js,jsx,ts,tsx,html}',
     './node_modules/@ue/**/*.{vue,js,jsx,ts,tsx}',
   ],
   theme: {

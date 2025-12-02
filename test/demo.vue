@@ -205,7 +205,8 @@ const onUpload = function (cell: Cell) {
            @removeRow="onRemoveRow"
            @fillCell="onFillCell"
            @clickFile="onShowFile"
-           @upload="onUpload"/>
+           @upload="onUpload">
+    </Sheet>
   </div>
 </template>
 

@@ -38,6 +38,7 @@ export const getColumnMenu = function () {
   return [
     {key: CellType.text, value: "Text"},
     {key: CellType.number, value: "Number"},
+    {key: CellType.file, value: "File"},
   ];
 }
 
