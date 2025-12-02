@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {ref} from "vue";
 import Sketch from "./sketch.vue";
+import {ref, onUnmounted} from "vue";
 
 const $emit = defineEmits(["update:value", "select"]);
 const props = defineProps({
@@ -68,7 +68,7 @@ const onClick = function () {
   removeEvent();
   window.addEventListener("click", blankClick);
 }
-
+onUnmounted(onHide);
 </script>
 
 <template>
