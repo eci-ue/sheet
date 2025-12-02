@@ -77,9 +77,14 @@ export const useEvent = function () {
         style = {};
       } else {
         style = (safeGet<object>(item, "value.style") || safeGet<object>(item, "dataValue.style")) || {};
-        if (_.hasIn(style, type)) {
+        if (type === ToolbarEvent.Fill || type === ToolbarEvent.Font) {
+          // 编辑背景色与字体颜色
+          safeSet(style, type, value);
+        } else if (_.hasIn(style, type)) {
+          // 判断是否存在，存在则置空
           style = _.omit(style, [type]);
         } else {
+          // 不存在则赋值
           safeSet(style, type, value);
         }
       }

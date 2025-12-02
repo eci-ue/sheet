@@ -93,7 +93,7 @@ const MakeCellEditor = function (View: IEditor) {
 
 export const RegisterCell = function (data: Column, disabled?: boolean): string | undefined {
   init();
-  if (disabled) {
+  if (disabled || data.readOnly) {
     return void 0;
   }
   const name = makeCellEditorName(data.type);

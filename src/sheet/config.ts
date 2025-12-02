@@ -62,11 +62,32 @@ export enum MenuEvent {
   merge = "merge",
 }
 
-export const SheetMenuConfig = function (sheetId: number | string | undefined, disabled: boolean, field: string, row: number, col: number): object[] | undefined {
+export const isReadOnly = function (columns: Column[] = [], columnId?: string): boolean {
+  let readOnly: boolean = false;
+  if (columnId) {
+    for (const item of columns) {
+      const id = safeGet<string>(item, "columnId") || safeGet<string>(item, "field");
+      if (id === columnId) {
+        readOnly = item.readOnly;
+      }
+      if (readOnly) {
+        break;
+      }
+    }
+  }
+  return readOnly;
+}
+
+export const SheetMenuConfig = function (sheetId: number | string | undefined, disabled: boolean, field: string, row: number, col: number, table: object): object[] | undefined {
   if (disabled) {
     return [];
   }
+  const columns = safeGet<Column[]>(table, "columns") || [];
   const menus = getColumnMenu();
+  const readOnly = isReadOnly(columns, field);
+  if (readOnly) {
+    return [];
+  }
   // 只在数据行显示菜单，不在表头显示
   if (row === 0) {
     if (col > 0) {
@@ -161,7 +182,7 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
       createReactContainer: true,
     },
     frozenColCount: 1,
-    rightFrozenColCount: disabled ? 2 : 0,
+    // rightFrozenColCount: disabled ? 2 : 0,
     dragOrder: {
       dragHeaderMode: disabled ? 'none' : 'all',
       // validateDragOrderOnEnd(source, target) {
@@ -180,17 +201,17 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
       }
     },
     excelOptions: {
-      fillHandle: true
+      fillHandle: !disabled
     },
     customMergeCell,
     menu: {
       // 单元格右键菜单
-      contextMenuItems: function (field: string, row: number, col: number) {
+      contextMenuItems: function (field: string, row: number, col: number, table: object) {
         let value: object[] | undefined;
         if (contextMenu) {
-          value = contextMenu(sheetId, disabled, field, row, col);
+          value = contextMenu(sheetId, disabled, field, row, col, table);
         } else {
-          value = SheetMenuConfig(sheetId, disabled, field, row, col);
+          value = SheetMenuConfig(sheetId, disabled, field, row, col, table);
         }
         return value ? value : [];
       },

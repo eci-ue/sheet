@@ -4,11 +4,11 @@ import Toolbar from "./toolbar.vue";
 import * as styleCell from "./cell";
 import {onMounted, watch, ref} from "vue";
 import * as preview from "../util/preview";
-import {SheetConfig, Icon} from "./config";
 import {emitNames, useEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
 import {useColumnList, useRowList} from "./use";
 import {Column, CellType, Cell} from "../types/sheet";
+import {SheetConfig, Icon, isReadOnly} from "./config";
 import {Group, ListColumn, ListTable, Image} from "@visactor/vue-vtable";
 
 import type {PropType} from "vue";
@@ -196,7 +196,8 @@ defineExpose({
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"
-                      :type="column.type">
+                      :type="column.type"
+                      :readOnly="column.readOnly">
             <template #customLayout="{ width, height, record }">
               <Group
                   :width="width"
@@ -237,10 +238,11 @@ defineExpose({
                       :options="column.options"
                       :type="column.type"
                       :fieldFormat="styleCell.format(column.columnId)"
-                      :style="styleCell.Style">
+                      :style="styleCell.Style"
+                      :readOnly="column.readOnly">
           </ListColumn>
         </template>
-        <ListColumn field="add_column" :width="60" :drag-header="false" :drag-body="false" :sortable="false"
+        <ListColumn v-if="!disabled" field="add_column" :width="60" :drag-header="false" :drag-body="false" :sortable="false"
                     :disable-select="true" :disable-column-resize="true" :disable-header-select="true"
                     :merge-cell="false">
           <template #headerCustomLayout="{ width, height }">
