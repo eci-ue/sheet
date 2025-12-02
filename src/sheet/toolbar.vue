@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import {ToolbarEvent} from "./config";
 import Color from "./color/index.vue";
-// @ts-ignore
-import CleanIcon from "./icon/clean.svg";
+import {ToolbarEvent, Icon} from "./config";
 
 const $emit = defineEmits(["click"]);
 
@@ -21,7 +19,7 @@ const onClick = function (type: string, value?: string) {
 <template>
   <div class="flex items-center gap-x-2 text-xl font-normal p-2">
     <span class="flex cursor-pointer" @click="onClick(ToolbarEvent.Clean)">
-      <img class="inline-block w-5" :src="CleanIcon">
+      <img class="inline-block w-5" :src="Icon.clean">
     </span>
     <span class="inline-block px-2 cursor-pointer" @click="onClick(ToolbarEvent.Bold)">B</span>
     <span class="inline-block px-2 cursor-pointer italic" @click="onClick(ToolbarEvent.Italic)">I</span>
@@ -31,7 +29,9 @@ const onClick = function (type: string, value?: string) {
       <span class="inline-block px-2 cursor-pointer underline decoration-red-700">A</span>
     </Color>
     <Color class="inline-block" @select="onClick(ToolbarEvent.Fill, $event)">
-      <span class="inline-block px-2 cursor-pointer underline decoration-orange-300">F</span>
+      <span class="flex cursor-pointer">
+        <img class="inline-block w-5" :src="Icon.fill">
+      </span>
     </Color>
   </div>
 </template>

@@ -15,7 +15,7 @@ const toJson = function <T>(res: AxiosResponse): T | undefined {
   return safeGet<T>(data, "data");
 }
 
-export const id = 223;
+export const id = 226;
 export const sheetKey = "collectionManageId";
 
 export const getColumnList = async function <T>(): Promise<T | undefined> {

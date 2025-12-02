@@ -19,6 +19,10 @@ import MusicIcon from "./icon/music.svg";
 import VideoIcon from "./icon/video.svg";
 // @ts-ignore
 import ZipIcon from "./icon/zip.svg";
+// @ts-ignore
+import CleanIcon from "./icon/clean.svg";
+// @ts-ignore
+import FillIcon from "./icon/fill.svg";
 
 import type {ContextMenu} from "../types/prop";
 import type {Column, Row} from "../types/sheet";
@@ -32,6 +36,8 @@ export const Icon = {
   image: ImageIcon,
   music: MusicIcon,
   doc: DocIcon,
+  clean: CleanIcon,
+  fill: FillIcon,
 }
 
 export const getColumnMenu = function () {

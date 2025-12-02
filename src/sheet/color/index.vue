@@ -19,20 +19,23 @@ const props = defineProps({
 });
 
 const colorRef = ref();
-const color = ref(props.value);
+const color = ref<string>();
 const status = ref<boolean>(false);
 
 const onSelectColor = function (value: string) {
+  let res: string | undefined = value;
   if (value && /(0,\s*0,\s*0,\s*0)/i.test(value)) {
+    res = void 0;
     $emit("update:value", void 0);
   } else {
     $emit("update:value", value);
   }
+  $emit("select", res);
 }
 
 const onHide = function () {
   status.value = false;
-  $emit("select", color.value);
+  //
 }
 
 function isDescendant(container: HTMLElement, target: HTMLElement) {
@@ -59,7 +62,8 @@ const removeEvent = function () {
   window.removeEventListener("click", blankClick);
 }
 
-const onClick = function (e: Event) {
+const onClick = function () {
+  color.value = props.value;
   status.value = true;
   removeEvent();
   window.addEventListener("click", blankClick);
