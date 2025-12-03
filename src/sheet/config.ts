@@ -27,6 +27,8 @@ import FillIcon from "./icon/fill.svg";
 import type {ContextMenu} from "../types/prop";
 import type {Column, Row} from "../types/sheet";
 
+export const addColumnKey = "add_column";
+
 export const Icon = {
   plus: AddColumnIcon,
   upload: UploadIcon,
@@ -98,7 +100,7 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
   if (row === 0) {
     if (col > 0) {
       let list: object[];
-      if (field === "add_column") {
+      if (field === addColumnKey) {
         list = _.map(menus, function (item) {
           return {text: item.value, menuKey: `${MenuEvent.addColumn}:1:${item.key}`, field};
         });

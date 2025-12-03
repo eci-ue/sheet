@@ -8,8 +8,8 @@ import {emitNames, useEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
 import {useColumnList, useRowList} from "./use";
 import {Column, CellType, Cell} from "../types/sheet";
-import {SheetConfig, Icon, isReadOnly} from "./config";
-import {Group, ListColumn, ListTable, Image} from "@visactor/vue-vtable";
+import {SheetConfig, Icon, addColumnKey} from "./config";
+import {Group, ListColumn, ListTable, Image, Text} from "@visactor/vue-vtable";
 
 import type {PropType} from "vue";
 import type {Row} from "../types/sheet";
@@ -173,7 +173,7 @@ defineExpose({
 <template>
   <div class="flex flex-col h-full">
     <div class="flex items-center gap-x-5">
-      <Toolbar v-if="toolbar" @click="toolbarClick"></Toolbar>
+      <Toolbar v-if="toolbar" @click="toolbarClick" :disabled="disabled"></Toolbar>
       <div class="flex-1">
         <slot name="toolbar"></slot>
       </div>
@@ -242,13 +242,19 @@ defineExpose({
                       :readOnly="column.readOnly">
           </ListColumn>
         </template>
-        <ListColumn v-if="!disabled" field="add_column" :width="60" :drag-header="false" :drag-body="false" :sortable="false"
+        <ListColumn v-if="!disabled" :field="addColumnKey" :width="60" :drag-header="false" :drag-body="false"
+                    :sortable="false"
                     :disable-select="true" :disable-column-resize="true" :disable-header-select="true"
                     :merge-cell="false">
           <template #headerCustomLayout="{ width, height }">
             <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center"
-                   cursor="pointer" :padding="0" @dblclick="onAddColumn()">
+                   cursor="pointer" :padding="0" @click="onAddColumn()">
               <Image :image="Icon.plus" :width="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"/>
+            </Group>
+          </template>
+          <template #customLayout="{ width, height }">
+            <Group :width="width" :height="height">
+              <Text/>
             </Group>
           </template>
         </ListColumn>

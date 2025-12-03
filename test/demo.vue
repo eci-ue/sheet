@@ -190,7 +190,7 @@ const onUpload = function (cell: Cell) {
   <div class="sheet-ui" :class="{'loading': loading}">
     <Sheet ref="sheetRef"
            v-model:loading="loading"
-           :disabled="false"
+           :disabled="true"
            :toolbar="true"
            :sheet-id="api.id"
            :column-list="api.getColumnList"

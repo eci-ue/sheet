@@ -6,7 +6,7 @@ import * as VTable from "@visactor/vtable";
 import safeGet from "@fengqiaogang/safe-get";
 import safeSet from "@fengqiaogang/safe-set";
 import {CellType, Column} from "../types/sheet";
-import {MenuEvent, ToolbarEvent} from "./config";
+import {MenuEvent, ToolbarEvent, addColumnKey} from "./config";
 
 
 import type {EmitFn} from "vue";
@@ -38,10 +38,14 @@ export const useEvent = function () {
     for (const array of cells) {
       const rows: Cell[] = [];
       for (const item of array) {
+        const columnId = safeGet<string>(item, "field")!;
+        if (columnId === addColumnKey || columnId === "_vtable_rowSeries_number") {
+          continue;
+        }
         const value = safeGet<Cell | string | undefined>(item, "value");
         if (_.isNil(value) || _.isString(value) || _.isNumber(value)) {
           const cell = new Cell();
-          cell.columnId = safeGet<string>(item, "field")!;
+          cell.columnId = columnId;
           cell.rowId = safeGet<string>(item, "originData.rowId")!;
           cell.txt = value as string;
           item.value = cell;
@@ -70,6 +74,7 @@ export const useEvent = function () {
     if (cells.length < 1) {
       return;
     }
+    console.log(type, value);
     const list: Cell[] = [];
     for (const item of _.flattenDeep(cells)) {
       let style: object;
