@@ -39,7 +39,7 @@ export const makeCellEditorName = function (type: string | number): string {
 }
 
 let __init: boolean = false
-const init = function () {
+export const init = function () {
   if (__init) {
     return;
   }

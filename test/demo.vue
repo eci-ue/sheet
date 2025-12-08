@@ -3,12 +3,14 @@ import * as _ from "lodash-es";
 import * as api from "./api";
 import {ref} from "vue";
 import safeGet from "@fengqiaogang/safe-get";
-import {Sheet, fillGenerate, fillCellCompute} from "../src";
+import {Sheet, fillGenerate, fillCellCompute, RegisterInit} from "../src";
 
 import type {Column, Row, Cell, FillCellOption} from "../src";
 
 const sheetRef = ref();
 const loading = ref<boolean>();
+
+RegisterInit();
 
 // 修改单元格内容
 const onChange = async function (value: object[]) {
