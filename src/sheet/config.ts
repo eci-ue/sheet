@@ -157,6 +157,9 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
       },
     ]
   }
+  if (field === addColumnKey){
+    return [];
+  }
   return [
     // 清空内容
     {text: "Clear Contents", menuKey: MenuEvent.emptyCell, field, row, col},
@@ -190,7 +193,7 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
       createReactContainer: true,
     },
     frozenColCount: 1,
-    // rightFrozenColCount: disabled ? 2 : 0,
+    rightFrozenColCount: disabled ? 0 : 1,
     dragOrder: {
       dragHeaderMode: disabled ? 'none' : 'all',
       // validateDragOrderOnEnd(source, target) {

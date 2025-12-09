@@ -96,14 +96,21 @@ const onLoad = function (type?: string) {
 }
 
 // 添加列
-const onAddColumn = _.debounce(function () {
+const onAddColumn = _.debounce(function (e: Event) {
+  // 如果是右键触发，则不进行任何处理
+  const button = safeGet<number>(e, "button");
+  if (button && button === 2) {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
   const data = new Column();
   data.type = CellType.text;
   $emit("addColumn", {
     column: data,
     direction: 1,
     columnId: void 0,
-  })
+  });
 }, 300, {leading: true, trailing: false});
 
 let onFileSelect: any = () => void 0;
@@ -248,7 +255,7 @@ defineExpose({
                     :merge-cell="false">
           <template #headerCustomLayout="{ width, height }">
             <Group :width="width" :height="height" display="flex" align-items="center" justify-content="center"
-                   cursor="pointer" :padding="0" @click="onAddColumn()">
+                   cursor="pointer" :padding="0" @click="onAddColumn">
               <Image :image="Icon.plus" :width="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"/>
             </Group>
           </template>
