@@ -5,6 +5,7 @@
 
 import * as _ from "lodash-es";
 import {GetCell} from "./config";
+import { CellType } from "../types/sheet";
 import type {FillCellOption, Column, Row, Cell} from "../types/sheet";
 
 const nextLetter = function (str: string = "a", step: number = 1): string {
@@ -64,10 +65,16 @@ export const fillCellCompute = function (option: FillCellOption, columns: Column
     // 从上往下填充
     for (let row = option.startRow + 1, index = 1; row <= option.endRow; row++, index++) {
       for (let col = option.startCol; col <= option.endCol; col++) {
-        const origin = GetCell(columns, rows, col - 1, option.startRow - 1);
-        const cell = GetCell(columns, rows, col - 1, row - 1);
+        const columnIndex = col - 1;
+        const column = columns[columnIndex];
+        const origin = GetCell(columns, rows, columnIndex, option.startRow - 1);
+        const cell = GetCell(columns, rows, columnIndex, row - 1);
         if (cell) {
-          cell.txt = fillGenerateValue(origin?.txt || "", index);
+          if (column.type === CellType.text || column.type === CellType.number) {
+            cell.txt = fillGenerateValue(origin?.txt || "", index);
+          } else {
+            cell.txt = origin?.txt || "";
+          }
           list.push(cell);
         }
       }
@@ -76,10 +83,16 @@ export const fillCellCompute = function (option: FillCellOption, columns: Column
     // 从下往上填充
     for (let row = option.startRow - 1, index = 0; row >= option.endRow; row--, index--) {
       for (let col = option.startCol; col <= option.endCol; col++) {
-        const origin = GetCell(columns, rows, col - 1, option.startRow - 1);
-        const cell = GetCell(columns, rows, col - 1, row - 1);
+        const columnIndex = col - 1;
+        const column = columns[columnIndex];
+        const origin = GetCell(columns, rows, columnIndex, option.startRow - 1);
+        const cell = GetCell(columns, rows, columnIndex, row - 1);
         if (cell) {
-          cell.txt = fillGenerateValue(origin?.txt || "", index - 1);
+          if (column.type === CellType.text || column.type === CellType.number) {
+            cell.txt = fillGenerateValue(origin?.txt || "", index - 1);
+          } else {
+            cell.txt = origin?.txt || "";
+          }
           list.push(cell);
         }
       }
