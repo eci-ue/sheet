@@ -101,9 +101,9 @@ const MakeCellEditor = function (View: IEditor) {
 
 export const RegisterCell = function (data: Column, disabled?: boolean): string | undefined {
   init();
-  // if (disabled || data.readOnly) {
-  //   return void 0;
-  // }
+  if (disabled || data.readOnly) {
+    return void 0;
+  }
   const name = makeCellEditorName(data.type);
   // 检查是否注入
   const View = GetCellView(name);
