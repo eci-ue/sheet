@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Sketch from "./sketch.vue";
 import {ref, onUnmounted} from "vue";
+// @ts-ignore
+import { isDescendant } from "../../util/dom";
 
 const $emit = defineEmits(["update:value", "select"]);
 const props = defineProps({
@@ -38,16 +40,7 @@ const onHide = function () {
   //
 }
 
-function isDescendant(container: HTMLElement, target: HTMLElement) {
-  if (!container || !target) {
-    return false;
-  }
-  // IE6-IE10 以及所有现代浏览器都支持 contains
-  // contains() 返回 true 代表：
-  // 1. target === container
-  // 2. target 是 container 任意层级子节点
-  return container.contains(target);
-}
+
 
 const blankClick = function (e: Event) {
   const status = isDescendant(colorRef.value, e.target as HTMLElement);

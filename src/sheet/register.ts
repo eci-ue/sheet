@@ -55,18 +55,27 @@ export const init = function () {
 const MakeCellEditor = function (View: IEditor) {
   // @ts-ignore
   class CellView extends View implements IEditor {
-    public rowIndex: number = 0;
-    public columnIndex: number = 0;
-    public cellValue?: Cell;
-    public sheetId?: string | number;
     public contextValue!: EditContext;
+
+    public _getData(context?: EditContext<any, any>) {
+      const ctx = context || this.contextValue;
+      const cell = (ctx.value || {}) as Cell;
+      const sheetId = safeGet<string | number>(ctx, "table.options.sheetId");
+      return {
+        sheetId,
+        cell,
+        row: ctx.row,
+        column: ctx.col,
+      }
+    }
 
     onStart(context: EditContext<any, any>) {
       this.contextValue = context;
       const cell = (context.value || {}) as Cell;
+      let value: any = cell ? cell.txt : void 0;
       return super.onStart({
         ...context,
-        value: cell ? cell.txt : void 0
+        value
       });
     }
 
@@ -74,13 +83,12 @@ const MakeCellEditor = function (View: IEditor) {
       if (this.contextValue?.table?.fireListeners) {
         // @ts-ignore
         const txt = this.getValue();
-        const cell = (this.contextValue.value || {}) as Cell;
-        const sheetId = safeGet<string | number>(this.contextValue, "table.options.sheetId");
+        const res = this._getData(this.contextValue);
         const data: EditCellData = {
-          sheetId,
-          row: this.contextValue.row,
-          column: this.contextValue.col,
-          value: {...cell, txt},
+          sheetId: res.sheetId,
+          row: res.row,
+          column: res.column,
+          value: {...res.cell, txt},
         }
         this.contextValue.table.fireListeners(CellEventName.Edit, [data]);
       }
@@ -93,9 +101,9 @@ const MakeCellEditor = function (View: IEditor) {
 
 export const RegisterCell = function (data: Column, disabled?: boolean): string | undefined {
   init();
-  if (disabled || data.readOnly) {
-    return void 0;
-  }
+  // if (disabled || data.readOnly) {
+  //   return void 0;
+  // }
   const name = makeCellEditorName(data.type);
   // 检查是否注入
   const View = GetCellView(name);
