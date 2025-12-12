@@ -4,11 +4,12 @@
  */
 
 export {useEvent} from "./sheet/event";
+export {default as Toolbar} from "./toolbar.vue";
 export {merge as CellMerge} from "./sheet/merge";
-export {SheetConfig, MenuEvent, GetCell} from "./sheet/config";
 export {CellType, OptionKV, Column, Cell, EditCellData} from "./types/sheet";
 export {fillGenerateValue as fillGenerate, fillCellCompute} from "./sheet/fill";
 export {StyleValue, Style as CellStyle, format as fieldFormat} from "./sheet/cell";
+export {SheetConfig, MenuEvent, GetCell, isReadOnly, getColumnMenu, addColumnKey, SheetMenuConfig} from "./sheet/config";
 export {
   CellEventName,
   SetCellView,

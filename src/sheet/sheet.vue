@@ -172,6 +172,7 @@ defineExpose({
   getInstance,      // 获取表格对象
   getSelectedCells, // 获取当前选中的单元格内容
   clearSelected,    // 清除单元格选中状态
+  toolbarClick,
 });
 
 
@@ -179,8 +180,8 @@ defineExpose({
 
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex items-center gap-x-5">
-      <Toolbar v-if="toolbar" @click="toolbarClick" :disabled="disabled"></Toolbar>
+    <div class="flex items-center gap-x-5 sheet-header" v-if="toolbar">
+      <Toolbar @click="toolbarClick" :disabled="disabled"></Toolbar>
       <div class="flex-1">
         <slot name="toolbar"></slot>
       </div>
