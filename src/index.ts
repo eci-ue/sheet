@@ -4,8 +4,8 @@
  */
 
 export {useEvent} from "./sheet/event";
-export {default as Toolbar} from "./toolbar.vue";
 export {merge as CellMerge} from "./sheet/merge";
+export {default as Toolbar} from "./sheet/toolbar.vue";
 export {CellType, OptionKV, Column, Cell, EditCellData} from "./types/sheet";
 export {fillGenerateValue as fillGenerate, fillCellCompute} from "./sheet/fill";
 export {StyleValue, Style as CellStyle, format as fieldFormat} from "./sheet/cell";
