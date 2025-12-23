@@ -25,7 +25,18 @@ export const getColumnList = async function <T>(): Promise<T | undefined> {
     },
     responseType: "json",
   });
-  return toJson<T>(res);
+  const list = toJson<T>(res);
+  // @ts-ignore
+  return _.map(list, function (item: object) {
+    const id = safeGet<string>(item, "columnId");
+    if (id === "b813f02cfb8e4ec8b7452643183fa6ab") {
+      return {
+        ...item,
+        custom: "sheet-button",
+      };
+    }
+    return item;
+  });
 }
 
 export const toRowList = function <T>(array: T[] = []): T[] {
@@ -92,7 +103,7 @@ export const addColumn = async function (column: object = {}, columnId?: string,
   return res.status >= 200 && res.status <= 300;
 }
 
-export const removeColumn = async function(columnId: string): Promise<boolean> {
+export const removeColumn = async function (columnId: string): Promise<boolean> {
   const data = {
     [sheetKey]: id,
     columnId,
@@ -107,7 +118,7 @@ export const removeColumn = async function(columnId: string): Promise<boolean> {
   return res.status >= 200 && res.status <= 300;
 }
 
-export const updateColumn = async function(data: object): Promise<boolean> {
+export const updateColumn = async function (data: object): Promise<boolean> {
   const res = await axios.put("/project/settingCollectionTable/changeFSHeaderInfo", JSON.stringify(data), {
     responseType: "json",
     headers: {
@@ -117,19 +128,19 @@ export const updateColumn = async function(data: object): Promise<boolean> {
   return res.status >= 200 && res.status <= 300;
 }
 
-export const addRow = async function(count: number = 1, direction: number = 1, rowId?: string): Promise<boolean> {
+export const addRow = async function (count: number = 1, direction: number = 1, rowId?: string): Promise<boolean> {
   let params: object;
   if (rowId) {
     if (count < 0) {
       // 向上添加
-      params = { [sheetKey]: id, cnt: 1, direction: count, rowId };
+      params = {[sheetKey]: id, cnt: 1, direction: count, rowId};
     } else {
       // 向下添加
-      params = { [sheetKey]: id, cnt: 1, direction: Math.abs(count), rowId };
+      params = {[sheetKey]: id, cnt: 1, direction: Math.abs(count), rowId};
     }
   } else {
     // 末尾添加
-    params = { [sheetKey]: id, cnt: Math.abs(count) };
+    params = {[sheetKey]: id, cnt: Math.abs(count)};
   }
   const res = await axios.post("/project/settingCollectionTable/addRow", JSON.stringify({}), {
     params,
@@ -141,7 +152,7 @@ export const addRow = async function(count: number = 1, direction: number = 1, r
   return res.status >= 200 && res.status <= 300;
 }
 
-export const removeRow = async function(rowIds: string[]): Promise<boolean> {
+export const removeRow = async function (rowIds: string[]): Promise<boolean> {
   const data = {
     [sheetKey]: id, rowIds
   };
@@ -154,7 +165,7 @@ export const removeRow = async function(rowIds: string[]): Promise<boolean> {
   return res.status >= 200 && res.status <= 300;
 }
 
-export const moveColumn = async function(source: string, target: string): Promise<boolean> {
+export const moveColumn = async function (source: string, target: string): Promise<boolean> {
   const params = {
     [sheetKey]: id, source, target
   };
@@ -168,7 +179,7 @@ export const moveColumn = async function(source: string, target: string): Promis
   return res.status >= 200 && res.status <= 300;
 }
 
-export const moveRow = async function(source: string, target: string): Promise<boolean> {
+export const moveRow = async function (source: string, target: string): Promise<boolean> {
   const params = {
     [sheetKey]: id, source, target
   };

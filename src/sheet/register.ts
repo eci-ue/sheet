@@ -3,10 +3,11 @@ import * as VTable from '@visactor/vtable';
 import safeGet from "@fengqiaogang/safe-get";
 import {EditContext, IEditor} from '@visactor/vtable-editors';
 
+import type {Component, VNode} from "vue";
 import type {Column, EditCellData, Cell} from "../types/sheet";
 
-const CellView = new Map<string, IEditor>();
 const RegisterStatus = new Set<string>();
+const CellView = new Map<string, IEditor | Component | VNode>();
 
 export enum CellEventName {
   Edit = "CellEdit",
@@ -17,7 +18,7 @@ export const HasCellView = function (name: string): boolean {
   return CellView.has(name);
 }
 
-export const GetCellView = function (name: string): IEditor | undefined {
+export const GetCellView = function(name: string): IEditor | Component | VNode | undefined {
   return CellView.get(name);
 }
 
@@ -26,7 +27,7 @@ export const RemoveCellView = function (name: string): boolean {
   return CellView.delete(name);
 }
 
-export const SetCellView = function (name: string, editor: IEditor): boolean {
+export const SetCellView = function (name: string, editor: IEditor | Component | VNode): boolean {
   if (HasCellView(name)) {
     RemoveCellView(name);
   }
@@ -106,7 +107,7 @@ export const RegisterCell = function (data: Column, disabled?: boolean): string 
   }
   const name = makeCellEditorName(data.type);
   // 检查是否注入
-  const View = GetCellView(name);
+  const View = GetCellView(name) as IEditor;
   if (View && RegisterStatus.has(name)) {
     return name;
   }

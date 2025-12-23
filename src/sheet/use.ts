@@ -12,8 +12,12 @@ export const RegisterCellView = function (sheetRef: Ref<any>, disabled?: boolean
   }
   const array: Column[] = [];
   for (const column of list) {
-    const name = RegisterCell(column, disabled);
-    array.push({ ...column, editor: name });
+    if (column.custom) {
+      array.push(column);
+    } else {
+      const name = RegisterCell(column, disabled);
+      array.push({...column, editor: name});
+    }
   }
   return array;
 }

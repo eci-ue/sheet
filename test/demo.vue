@@ -2,8 +2,9 @@
 import * as _ from "lodash-es";
 import * as api from "./api";
 import {ref} from "vue";
+import Button from "./button.vue";
 import safeGet from "@fengqiaogang/safe-get";
-import {Sheet, fillGenerate, fillCellCompute, RegisterInit} from "../src";
+import {Sheet, fillGenerate, fillCellCompute, RegisterInit, SetCellView} from "../src";
 
 import type {Column, Row, Cell, FillCellOption} from "../src";
 
@@ -11,6 +12,8 @@ const sheetRef = ref();
 const loading = ref<boolean>();
 
 RegisterInit();
+
+SetCellView("sheet-button", Button);
 
 // 修改单元格内容
 const onChange = async function (value: object[]) {
@@ -195,6 +198,7 @@ const onUpload = function (cell: Cell) {
            :disabled="false"
            :toolbar="true"
            :sheet-id="api.id"
+           :add-column="false"
            :column-list="api.getColumnList"
            :row-list="api.getRowList"
            @move="onMove"

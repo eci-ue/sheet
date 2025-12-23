@@ -2,11 +2,12 @@
 import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
 import * as styleCell from "./cell";
-import {onMounted, watch, ref} from "vue";
+import {GetCellView} from "./register";
 import * as preview from "../util/preview";
 import {emitNames, useEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
 import {useColumnList, useRowList} from "./use";
+import {onMounted, watch, ref, computed} from "vue";
 import {Column, CellType, Cell} from "../types/sheet";
 import {SheetConfig, Icon, addColumnKey} from "./config";
 import {Group, ListColumn, ListTable, Image, Text} from "@visactor/vue-vtable";
@@ -39,7 +40,7 @@ const props = defineProps({
   // 表格配置项，为空时使用默认配置规则
   config: {
     required: false,
-    type: Object as PropType<object>
+    type: [Object, Function]
   },
   // 是否禁用
   disabled: {
@@ -49,7 +50,11 @@ const props = defineProps({
   toolbar: {
     required: false,
     type: Boolean as PropType<boolean>,
-  }
+  },
+  addColumn: {
+    required: false,
+    type: Boolean as PropType<boolean>,
+  },
 });
 
 const fileRef = ref();
@@ -175,6 +180,24 @@ defineExpose({
   toolbarClick,
 });
 
+const customCell = function (value: any): any {
+  const node = GetCellView(value);
+  return node ? node : value;
+}
+
+// Table Config
+const sheetOption = computed<object>(function () {
+  if (props.config) {
+    if (typeof props.config === "function") {
+      return props.config(props.sheetId, props.disabled, props.contextMenu);
+    }
+    if (typeof props.config === "object") {
+      return props.config;
+    }
+  }
+  // 默认配置
+  return SheetConfig(props.sheetId, props.disabled, props.contextMenu);
+})
 
 </script>
 
@@ -193,10 +216,11 @@ defineExpose({
       </div>
       <ListTable ref="sheetRef"
                  :records="rows"
-                 :options="config || SheetConfig(sheetId, disabled, contextMenu)"
+                 :options="sheetOption"
                  rowResize-mode="all"
                  rowResize-type="row">
         <template v-for="column in columns" :key="column.columnId">
+          <!--附件-->
           <ListColumn v-if="column.type === CellType.file || column.type === CellType.image"
                       :field="column.columnId"
                       :title="column.label"
@@ -237,6 +261,28 @@ defineExpose({
               </Group>
             </template>
           </ListColumn>
+          <ListColumn v-else-if="column.custom"
+                      :field="column.columnId"
+                      :title="column.label"
+                      :width="Math.max(column.width, 150)"
+                      :merge-cell="false"
+                      :editor="column.editor"
+                      :options="column.options"
+                      :type="column.type"
+                      :fieldFormat="styleCell.format(column.columnId)"
+                      :style="styleCell.Style"
+                      :readOnly="column.readOnly">
+            <template #customLayout="{ width, height, record }">
+              <Group :width="width" :height="height" display="flex" align-items="center" :vue="{}">
+                <component :is="customCell(column.custom)"
+                           :width="width"
+                           :height="height"
+                           :row="record"
+                           :column="column"></component>
+              </Group>
+            </template>
+          </ListColumn>
+          <!--默认展示方式-->
           <ListColumn v-else
                       :field="column.columnId"
                       :title="column.label"
@@ -250,7 +296,9 @@ defineExpose({
                       :readOnly="column.readOnly">
           </ListColumn>
         </template>
-        <ListColumn v-if="!disabled" :field="addColumnKey" :width="60" :drag-header="false" :drag-body="false"
+        <!--新增列-->
+        <ListColumn v-if="addColumn ? !disabled : false" :field="addColumnKey" :width="60" :drag-header="false"
+                    :drag-body="false"
                     :sortable="false"
                     :disable-select="true" :disable-column-resize="true" :disable-header-select="true"
                     :merge-cell="false">

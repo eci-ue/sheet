@@ -33,6 +33,7 @@ export class Column {
   public readOnly: boolean = false; // 是否只读, 默认允许编辑
   public options: OptionKV[] = [];  // 辅助数据列表
   public editor?: string;           // 编辑器组件名称
+  public custom?: string;           // 自定义渲染
   constructor(type?: CellType, options?: OptionKV[]) {
     this.type = type || CellType.text;
     this.options = options || [];
