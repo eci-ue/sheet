@@ -151,7 +151,7 @@ const onFileUpload = function (column: Column, record: Row) {
 }
 
 const onFileShow = function (column: Column, record: Row) {
-  if (props.disabled) {
+  if (props.disabled || column.readOnly) {
     return;
   }
   const cell = safeGet<Cell>(record, column.columnId);
