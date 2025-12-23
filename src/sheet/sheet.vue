@@ -16,7 +16,7 @@ import type {PropType} from "vue";
 import type {Row} from "../types/sheet";
 import type {ColumnList, ContextMenu, RowList} from "../types/prop";
 
-const $emit = defineEmits(["update:loading", "clickFile", "upload", ...emitNames]);
+const $emit = defineEmits(["update:loading", "clickFile", "upload", "custom", ...emitNames]);
 const props = defineProps({
   sheetId: {
     required: false,
@@ -199,6 +199,10 @@ const sheetOption = computed<object>(function () {
   return SheetConfig(props.sheetId, props.disabled, props.contextMenu);
 })
 
+const onCustom = function (e: Event) {
+  $emit("custom", e);
+}
+
 </script>
 
 <template>
@@ -278,7 +282,9 @@ const sheetOption = computed<object>(function () {
                            :width="width"
                            :height="height"
                            :row="record"
-                           :column="column"></component>
+                           :column="column"
+                           :sheet-id="sheetId"
+                           @custom="onCustom"/>
               </Group>
             </template>
           </ListColumn>
