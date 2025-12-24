@@ -120,8 +120,9 @@ const onAddColumn = _.debounce(function (e: Event) {
 
 let onFileSelect: any = () => void 0;
 
+// 上传文件
 const onFileUpload = function (column: Column, record: Row) {
-  if (props.disabled) {
+  if (props.disabled || column.readOnly) {
     return;
   }
   let cell = safeGet<Cell>(record, column.columnId);
@@ -150,10 +151,8 @@ const onFileUpload = function (column: Column, record: Row) {
   }
 }
 
+// 查看文件
 const onFileShow = function (column: Column, record: Row) {
-  if (props.disabled || column.readOnly) {
-    return;
-  }
   const cell = safeGet<Cell>(record, column.columnId);
   if (cell && cell.txt) {
     $emit("clickFile", cell);
