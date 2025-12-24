@@ -26,6 +26,7 @@ export {default as NumberEditor} from "./sheet/widgets/number";
 export {Editor as TextEditor} from "./sheet/widgets/text/editor";
 
 export {default as Sheet} from "./sheet/sheet.vue";
+export {Table} from "./table/index";
 
 export * as dom from "./util/dom";
 export * as preview from "./util/preview";

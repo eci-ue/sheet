@@ -25,12 +25,12 @@ const props = defineProps({
   // 标题列表
   columnList: {
     required: false,
-    type: Function as PropType<ColumnList>
+    type: [Array, Function] as PropType<ColumnList | Column[]>
   },
   // 行列表
   rowList: {
     required: false,
-    type: Function as PropType<RowList>
+    type: [Array, Function] as PropType<RowList | Row[]>
   },
   // 菜单列表
   contextMenu: {
@@ -55,24 +55,50 @@ const props = defineProps({
     required: false,
     type: Boolean as PropType<boolean>,
   },
+  // 是否显示编号
+  rowNumber: {
+    required: false,
+    type: Boolean as PropType<boolean>,
+    default: () => true,
+  }
 });
 
 const fileRef = ref();
 const imageRef = ref();
 const {sheetRef, getInstance, bindEvent, toolbarClick, getSelectedCells, clearSelected} = useEvent();
 
+const getColumnList: ColumnList = function () {
+  if (props.columnList && Array.isArray(props.columnList)) {
+    return props.columnList;
+  }
+  if (props.columnList && typeof props.columnList === "function") {
+    return props.columnList();
+  }
+  return [];
+}
+
+const getRowList: RowList = function () {
+  if (props.rowList && Array.isArray(props.rowList)) {
+    return props.rowList;
+  }
+  if (props.rowList && typeof props.rowList === "function") {
+    return props.rowList();
+  }
+  return [];
+}
+
 // 获取行数据
 const {
   state: rows,
   isLoading: loadingRow,
   execute: onLoadRows
-} = useRowList(sheetRef, props.disabled, props.rowList, [], false);
+} = useRowList(sheetRef, props.disabled, getRowList, [], false);
 // 获取列数据
 const {
   state: columns,
   isLoading: loadingColumn,
   execute: onLoadColumns
-} = useColumnList(sheetRef, props.disabled, props.columnList, [], false);
+} = useColumnList(sheetRef, props.disabled, getColumnList, [], false);
 
 // 监听 loading 状态
 watch([loadingRow, loadingColumn], () => {
@@ -154,7 +180,7 @@ const onFileUpload = function (column: Column, record: Row) {
 // 查看文件
 const onFileShow = function (column: Column, record: Row) {
   const cell = safeGet<Cell>(record, column.columnId);
-  if (cell && cell.txt) {
+  if (cell) {
     $emit("clickFile", cell);
   } else {
     return onFileUpload(column, record);
@@ -186,20 +212,66 @@ const customCell = function (value: any): any {
 
 // Table Config
 const sheetOption = computed<object>(function () {
+  let config: any;
   if (props.config) {
     if (typeof props.config === "function") {
-      return props.config(props.sheetId, props.disabled, props.contextMenu);
-    }
-    if (typeof props.config === "object") {
-      return props.config;
+      config = props.config(props.sheetId, props.disabled, props.contextMenu);
+    } else if (typeof props.config === "object") {
+      config = props.config;
     }
   }
-  // 默认配置
-  return SheetConfig(props.sheetId, props.disabled, props.contextMenu);
+  if (!config) {
+    // 默认配置
+    config = SheetConfig(props.sheetId, props.disabled, props.contextMenu, props.addColumn);
+  }
+  let left = 0;
+  let right = 0;
+  // 如果需要显示行号
+  if (props.rowNumber) {
+    left += 1;
+  }
+  // 如果需要显示添加列
+  if (props.addColumn) {
+    right += 1;
+  }
+  if (config && columns.value.length > 0) {
+    for (const item of columns.value) {
+      const fixed = item["fixed"];
+      if (fixed) {
+        if (fixed === "right") {
+          right += 1;
+        } else {
+          left += 1;
+        }
+      }
+    }
+  }
+  config["frozenColCount"] = left;
+  config["rightFrozenColCount"] = right;
+  if (props.rowNumber) {
+    return config;
+  } else {
+    return {...config, rowSeriesNumber: void 0}
+  }
 })
 
 const onCustom = function (e: Event) {
   $emit("custom", e);
+}
+
+const fileValue = function (row: Row, column: Column) {
+  const key = column.columnId;
+  if (row[key]) {
+    return typeof row[key] === "object" ? row[key].txt : row[key];
+  }
+}
+const isFile = function (row: Row, column: Column, fun: (value: string) => boolean): boolean {
+  // record[column.columnId] && preview.isAudio(record[column.columnId].txt)
+  const value = fileValue(row, column);
+  if (value) {
+    return fun(String(value));
+  }
+  return false;
 }
 
 </script>
@@ -227,7 +299,7 @@ const onCustom = function (e: Event) {
           <ListColumn v-if="column.type === CellType.file || column.type === CellType.image"
                       :field="column.columnId"
                       :title="column.label"
-                      :width="Math.max(column.width, 150)"
+                      :width="Math.max(column.width || 0, 150)"
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"
@@ -239,27 +311,27 @@ const onCustom = function (e: Event) {
                   :height="height"
                   display="flex"
                   align-items="center">
-                <template v-if="record[column.columnId] && preview.isImage(record[column.columnId].txt)">
-                  <Image cursor="pointer" :image="record[column.columnId].txt" :width="20" :height="20"
-                         :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+                <template v-if="isFile(record, column, preview.isImage)">
+                  <Image cursor="pointer" :image="fileValue(record, column)" :width="24" :height="24"
+                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
                 </template>
-                <template v-else-if="record[column.columnId] && preview.isAudio(record[column.columnId].txt)">
-                  <Image cursor="pointer" :image="Icon.auto" :width="20" :height="20"
-                         :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+                <template v-else-if="isFile(record, column, preview.isAudio)">
+                  <Image cursor="pointer" :image="Icon.auto" :width="24" :height="24"
+                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
                 </template>
-                <template v-else-if="record[column.columnId] && preview.isVideo(record[column.columnId].txt)">
-                  <Image cursor="pointer" :image="Icon.video" :width="20" :height="20"
-                         :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+                <template v-else-if="isFile(record, column, preview.isVideo)">
+                  <Image cursor="pointer" :image="Icon.video" :width="24" :height="24"
+                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
                 </template>
-                <template v-else-if="record[column.columnId] && preview.isZip(record[column.columnId].txt)">
-                  <Image cursor="pointer" :image="Icon.zip" :width="20" :height="20"
-                         :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+                <template v-else-if="isFile(record, column, preview.isZip)">
+                  <Image cursor="pointer" :image="Icon.zip" :width="24" :height="24"
+                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
                 </template>
-                <template v-else-if="record[column.columnId] && record[column.columnId].txt">
-                  <Image cursor="pointer" :image="Icon.auto" :width="20" :height="20"
-                         :boundsPadding="[0, 15, 0, 15]" @click="onFileShow(column, record)"/>
+                <template v-else-if="fileValue(record, column)">
+                  <Image cursor="pointer" :image="Icon.auto" :width="24" :height="24"
+                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
                 </template>
-                <Image :image="Icon.upload" :width="20" :height="20" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"
+                <Image :image="Icon.upload" :width="24" :height="24" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"
                        @click="onFileUpload(column, record)"/>
               </Group>
             </template>
@@ -267,7 +339,7 @@ const onCustom = function (e: Event) {
           <ListColumn v-else-if="column.custom"
                       :field="column.columnId"
                       :title="column.label"
-                      :width="Math.max(column.width, 150)"
+                      :width="Math.max(column.width || 0, 150)"
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"
@@ -291,7 +363,7 @@ const onCustom = function (e: Event) {
           <ListColumn v-else
                       :field="column.columnId"
                       :title="column.label"
-                      :width="Math.max(column.width, 150)"
+                      :width="Math.max(column.width || 0, 150)"
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"

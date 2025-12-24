@@ -34,6 +34,7 @@ export class Column {
   public options: OptionKV[] = [];  // 辅助数据列表
   public editor?: string;           // 编辑器组件名称
   public custom?: string;           // 自定义渲染
+  public fixed?: string | boolean;  // 固定列
   constructor(type?: CellType, options?: OptionKV[]) {
     this.type = type || CellType.text;
     this.options = options || [];

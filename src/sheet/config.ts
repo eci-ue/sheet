@@ -86,7 +86,7 @@ export const isReadOnly = function (columns: Column[] = [], columnId?: string): 
   return readOnly;
 }
 
-export const SheetMenuConfig = function (sheetId: number | string | undefined, disabled: boolean, field: string, row: number, col: number, table: object): object[] | undefined {
+export const SheetMenuConfig = function (sheetId: number | string | undefined, disabled: boolean, field: string, row: number, col: number, table: object, addColumn?: boolean): object[] | undefined {
   if (disabled) {
     return [];
   }
@@ -98,7 +98,7 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
   }
   // 只在数据行显示菜单，不在表头显示
   if (row === 0) {
-    if (col > 0) {
+    if (col > 0 && addColumn) {
       let list: object[];
       if (field === addColumnKey) {
         list = _.map(menus, function (item) {
@@ -128,7 +128,7 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
     }
     return [];
   }
-  if (col === 0) {
+  if (col === 0 && addColumn) {
     return [
       {text: "Delete row", menuKey: MenuEvent.removeRow, field, row, col},
       {
@@ -168,12 +168,16 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
   ]
 }
 
-export const SheetConfig = function (sheetId?: number | string, disabled: boolean = false, contextMenu?: ContextMenu): object {
+export const SheetConfig = function (sheetId?: number | string, disabled: boolean = false, contextMenu?: ContextMenu, addColumn?: boolean): object {
   return {
     sheetId,
     widthMode: 'standard',
     heightMode: "autoHeight",
     // heightMode: 'standard',
+    containerFit: {
+      height: true,
+      width: false,
+    },
     defaultRowHeight: 60,
     autoFillHeight: false,
     heightAdaptiveMode: "all",
@@ -185,15 +189,15 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
     editCellTrigger: 'doubleclick',
     // editCellTrigger: 'click',
     keyboardOptions: {
-      copySelected: false,
-      pasteValueToCell: false,
-      selectAllOnCtrlA: false
+      copySelected: true, // 允许拷贝
+      pasteValueToCell: false, // 禁止粘贴
+      selectAllOnCtrlA: true // 允许全选
     },
     customConfig: {
       createReactContainer: true,
     },
-    frozenColCount: 1,
-    rightFrozenColCount: disabled ? 0 : 1,
+    frozenColCount: 0,  // 左侧冻结列数
+    rightFrozenColCount: 0, //右侧冻结列数
     dragOrder: {
       dragHeaderMode: disabled ? 'none' : 'all',
       // validateDragOrderOnEnd(source, target) {
@@ -205,7 +209,7 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
       title: "No.",
       dragOrder: !disabled,
       width: 85,
-      disableColumnResize: false,
+      disableColumnResize: true,
       cellType: 'text',
       style: {
         autoWrapText: false,
@@ -220,9 +224,9 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
       contextMenuItems: function (field: string, row: number, col: number, table: object) {
         let value: object[] | undefined;
         if (contextMenu) {
-          value = contextMenu(sheetId, disabled, field, row, col, table);
+          value = contextMenu(sheetId, disabled, field, row, col, table, addColumn);
         } else {
-          value = SheetMenuConfig(sheetId, disabled, field, row, col, table);
+          value = SheetMenuConfig(sheetId, disabled, field, row, col, table, addColumn);
         }
         return value ? value : [];
       },

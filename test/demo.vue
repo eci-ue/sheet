@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import * as _ from "lodash-es";
-import * as api from "./api";
 import {ref} from "vue";
+import Spin from "./spin.vue";
+import * as api from "./api";
+import * as _ from "lodash-es";
 import Button from "./button.vue";
 import safeGet from "@fengqiaogang/safe-get";
 import {Sheet, fillGenerate, fillCellCompute, RegisterInit, SetCellView} from "../src";
@@ -192,7 +193,7 @@ const onUpload = function (cell: Cell) {
 </script>
 
 <template>
-  <div class="sheet-ui" :class="{'loading': loading}">
+  <Spin :loading="loading">
     <Sheet ref="sheetRef"
            v-model:loading="loading"
            :disabled="false"
@@ -214,32 +215,5 @@ const onUpload = function (cell: Cell) {
            @clickFile="onShowFile"
            @upload="onUpload">
     </Sheet>
-  </div>
+  </Spin>
 </template>
-
-<style scoped>
-.sheet-ui {
-  height: 100vh;
-  position: relative;
-}
-
-.sheet-ui:after {
-  display: none;
-  content: "Loading ...";
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  color: white;
-  font-size: 20px;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.2);
-  transition: all 0.3s;
-}
-
-.loading:after {
-  display: flex;
-}
-</style>
