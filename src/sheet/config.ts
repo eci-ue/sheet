@@ -157,7 +157,7 @@ export const SheetMenuConfig = function (sheetId: number | string | undefined, d
       },
     ]
   }
-  if (field === addColumnKey){
+  if (field === addColumnKey) {
     return [];
   }
   return [

@@ -2,6 +2,7 @@
 import * as _ from "lodash-es";
 import Toolbar from "./toolbar.vue";
 import * as styleCell from "./cell";
+import {toList} from "../util/json";
 import {GetCellView} from "./register";
 import * as preview from "../util/preview";
 import {emitNames, useEvent} from "./event";
@@ -19,6 +20,11 @@ import type {ColumnList, ContextMenu, RowList} from "../types/prop";
 const $emit = defineEmits(["update:loading", "clickFile", "upload", "custom", ...emitNames]);
 const props = defineProps({
   sheetId: {
+    required: false,
+    type: [String, Number] as PropType<string | number>,
+  },
+  // 表格的唯一ID
+  uuid: {
     required: false,
     type: [String, Number] as PropType<string | number>,
   },
@@ -60,6 +66,11 @@ const props = defineProps({
     required: false,
     type: Boolean as PropType<boolean>,
     default: () => true,
+  },
+  filePreviewSize: {
+    required: false,
+    default: () => 80,
+    type: Number as PropType<number>,
   }
 });
 
@@ -109,20 +120,18 @@ watch([loadingRow, loadingColumn], () => {
   }
 });
 
-const onLoad = function (type?: string) {
+const onLoad = async function (type?: string) {
   if (type) {
     if (onLoadRows && type === "row") {
-      onLoadRows();
+      await onLoadRows();
     } else if (onLoadColumns && type === "column") {
-      onLoadColumns();
+      await onLoadColumns();
     }
   } else {
-    if (onLoadRows) {
-      onLoadRows();
-    }
-    if (onLoadColumns) {
-      onLoadColumns();
-    }
+    await Promise.all([
+      onLoadRows ? onLoadRows() : void 0,
+      onLoadColumns ? onLoadColumns() : void 0,
+    ]);
   }
 }
 
@@ -177,20 +186,10 @@ const onFileUpload = function (column: Column, record: Row) {
   }
 }
 
-// 查看文件
-const onFileShow = function (column: Column, record: Row) {
-  const cell = safeGet<Cell>(record, column.columnId);
-  if (cell) {
-    $emit("clickFile", cell);
-  } else {
-    return onFileUpload(column, record);
-  }
-}
 
-
-onMounted(function () {
-  onLoad();
-  setTimeout(() => bindEvent($emit));
+onMounted(async function () {
+  await onLoad();
+  setTimeout(() => bindEvent($emit, props.uuid || props.sheetId));
 });
 
 defineExpose({
@@ -265,13 +264,27 @@ const fileValue = function (row: Row, column: Column) {
     return typeof row[key] === "object" ? row[key].txt : row[key];
   }
 }
-const isFile = function (row: Row, column: Column, fun: (value: string) => boolean): boolean {
-  // record[column.columnId] && preview.isAudio(record[column.columnId].txt)
+
+const fileList = function (row: Row, column: Column) {
   const value = fileValue(row, column);
-  if (value) {
-    return fun(String(value));
+  return value ? toList(value as string) : [];
+}
+
+// 查看文件
+const onFileShow = function (column: Column, record: Row, src: string) {
+  const cell = safeGet<Cell>(record, column.columnId);
+  if (cell) {
+    $emit("clickFile", cell, src);
+  } else {
+    return onFileUpload(column, record);
   }
-  return false;
+}
+
+const boundsPadding = [10, 10, 10, 10];
+
+const MaxSize = function (width: number, value: number): number {
+  const padding = boundsPadding[0] + boundsPadding[2];
+  return (value + padding) > width ? (width - padding) : value;
 }
 
 </script>
@@ -305,33 +318,30 @@ const isFile = function (row: Row, column: Column, fun: (value: string) => boole
                       :options="column.options"
                       :type="column.type"
                       :readOnly="column.readOnly">
-            <template #customLayout="{ width, height, record }">
-              <Group
-                  :width="width"
-                  :height="height"
-                  display="flex"
-                  align-items="center">
-                <template v-if="isFile(record, column, preview.isImage)">
-                  <Image cursor="pointer" :image="fileValue(record, column)" :width="24" :height="24"
-                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
-                </template>
-                <template v-else-if="isFile(record, column, preview.isAudio)">
-                  <Image cursor="pointer" :image="Icon.auto" :width="24" :height="24"
-                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
-                </template>
-                <template v-else-if="isFile(record, column, preview.isVideo)">
-                  <Image cursor="pointer" :image="Icon.video" :width="24" :height="24"
-                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
-                </template>
-                <template v-else-if="isFile(record, column, preview.isZip)">
-                  <Image cursor="pointer" :image="Icon.zip" :width="24" :height="24"
-                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
-                </template>
-                <template v-else-if="fileValue(record, column)">
-                  <Image cursor="pointer" :image="Icon.auto" :width="24" :height="24"
-                         :boundsPadding="[0, 0, 0, 15]" @click="onFileShow(column, record)"/>
-                </template>
-                <Image :image="Icon.upload" :width="24" :height="24" :boundsPadding="[0, 15, 0, 15]" cursor="pointer"
+            <template #customLayout="{ width, record }">
+              <Group :width="width" display="flex" align-items="center" flexWrap="wrap">
+                <Group v-for="src in fileList(record, column)" :key="src">
+                  <Image v-if="preview.isImage(src)" cursor="pointer" :image="src"
+                         :width="MaxSize(width, filePreviewSize)"
+                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                         @click="onFileShow(column, record, src)"/>
+                  <Image v-else-if="preview.isAudio(src)" cursor="pointer" :image="Icon.auto"
+                         :width="MaxSize(width, filePreviewSize)"
+                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                         @click="onFileShow(column, record, src)"/>
+                  <Image v-else-if="preview.isVideo(src)" cursor="pointer" :image="Icon.video"
+                         :width="MaxSize(width, filePreviewSize)"
+                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                         @click="onFileShow(column, record, src)"/>
+                  <Image v-else-if="preview.isZip(src)" cursor="pointer" :image="Icon.zip"
+                         :width="MaxSize(width, filePreviewSize)"
+                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                         @click="onFileShow(column, record, src)"/>
+                  <Image v-else cursor="pointer" :image="Icon.auto" :width="MaxSize(width, filePreviewSize)"
+                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                         @click="onFileShow(column, record, src)"/>
+                </Group>
+                <Image :image="Icon.upload" :width="24" :height="24" :boundsPadding="boundsPadding" cursor="pointer"
                        @click="onFileUpload(column, record)"/>
               </Group>
             </template>

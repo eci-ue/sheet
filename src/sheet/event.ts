@@ -74,7 +74,6 @@ export const useEvent = function () {
     if (cells.length < 1) {
       return;
     }
-    console.log(type, value);
     const list: Cell[] = [];
     for (const item of _.flattenDeep(cells)) {
       let style: object;
@@ -108,11 +107,31 @@ export const useEvent = function () {
     instance.fireListeners(CellEventName.Style, list);
   }
 
-  const bindEvent = function ($emit: EmitFn) {
+  const bindEvent = function ($emit: EmitFn, uuid?: number | string) {
     const instance = getInstance();
     if (!instance) {
       return;
     }
+
+    const scrollTop = `sheet-scroll-top:${uuid || 0}`;
+
+    // 滚动条事件
+    instance.on("scroll", (e: object) => {
+      const value = _.pick(e, ["scrollLeft", "scrollTop", "viewHeight"]);
+      const top = safeGet<number>(value, "scrollTop") || 0;
+      $emit("scroll", value);
+      sessionStorage.setItem(scrollTop, String(Math.floor(top)));
+    });
+    setTimeout(function () {
+      const value = sessionStorage.getItem(scrollTop) || "0";
+      if (/\d/.test(value)) {
+        const top = Number(value);
+        if (top > 0) {
+          instance.setScrollTop(top);
+        }
+      }
+    });
+
     // 单元格编辑事件
     instance.off(CellEventName.Edit);
     instance.on(CellEventName.Edit, function (list: EditCellData[]) {

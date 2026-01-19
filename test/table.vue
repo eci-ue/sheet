@@ -4,7 +4,7 @@ import {Table, CellType, Column} from "../src/index";
 
 const columns: Column[] = [
   {type: CellType.text, label: "A", readOnly: false, columnId: "key1", fixed: true, width: 200},
-  {type: CellType.file, label: "B", readOnly: false, columnId: "key2", width: 200},
+  {type: CellType.file, label: "B", readOnly: false, columnId: "key2", width: 150},
   {type: CellType.text, label: "C", readOnly: true, columnId: "key3"},
   {type: CellType.text, label: "D", readOnly: true, columnId: "key4"},
   {type: CellType.text, label: "E", readOnly: true, columnId: "key5"},
@@ -17,19 +17,59 @@ const columns: Column[] = [
 const list = [
   {
     key1: "A1",
-    key2: "B1"
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
   },
   {
-    key1: "A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1",
-    key2: "B1"
+    key1: "A1",
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
   },
   {
-    key1: "A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1",
-    key2: "B1"
+    key1: "A1",
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
   },
   {
-    key1: "A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1",
-    key2: "B1"
+    key1: "A1",
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
+  },
+  {
+    key1: "A1",
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
+  },
+  {
+    key1: "A1",
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
+  },
+  {
+    key1: "A1",
+    key2: `[
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
+      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
+    ]`
   },
 ];
 </script>
