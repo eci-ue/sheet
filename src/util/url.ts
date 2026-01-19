@@ -5,8 +5,10 @@
 
 import URLParse from "url-parse";
 
+// @ts-ignore
 class URL extends URLParse {
   constructor(value?: string) {
+    // @ts-ignore
     super(value);
   }
 }

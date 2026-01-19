@@ -71,7 +71,11 @@ const props = defineProps({
     required: false,
     default: () => 80,
     type: Number as PropType<number>,
-  }
+  },
+  filePreviewCrop: {
+    required: false,
+    type: Function as PropType<(value: object) => string>
+  },
 });
 
 const fileRef = ref();
@@ -287,6 +291,14 @@ const MaxSize = function (width: number, value: number): number {
   return (value + padding) > width ? (width - padding) : value;
 }
 
+const imageCrop = function(value: string, width: number): string {
+  if (props.filePreviewCrop && value) {
+    const size = MaxSize(width, props.filePreviewSize);
+    return props.filePreviewCrop({src: value, size});
+  }
+  return value;
+}
+
 </script>
 
 <template>
@@ -321,9 +333,8 @@ const MaxSize = function (width: number, value: number): number {
             <template #customLayout="{ width, record }">
               <Group :width="width" display="flex" align-items="center" flexWrap="wrap">
                 <Group v-for="src in fileList(record, column)" :key="src">
-                  <Image v-if="preview.isImage(src)" cursor="pointer" :image="src"
-                         :width="MaxSize(width, filePreviewSize)"
-                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                  <Image v-if="preview.isImage(src)" cursor="pointer" :image="imageCrop(src, width)"
+                         :width="MaxSize(width, filePreviewSize)" :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding" :keepAspectRatio="true"
                          @click="onFileShow(column, record, src)"/>
                   <Image v-else-if="preview.isAudio(src)" cursor="pointer" :image="Icon.auto"
                          :width="MaxSize(width, filePreviewSize)"
