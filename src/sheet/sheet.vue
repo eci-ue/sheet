@@ -332,25 +332,38 @@ const imageCrop = function(value: string, width: number): string {
                       :readOnly="column.readOnly">
             <template #customLayout="{ width, record }">
               <Group :width="width" display="flex" align-items="center" flexWrap="wrap">
-                <Group v-for="src in fileList(record, column)" :key="src">
-                  <Image v-if="preview.isImage(src)" cursor="pointer" :image="imageCrop(src, width)"
-                         :width="MaxSize(width, filePreviewSize)" :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding" :keepAspectRatio="true"
-                         @click="onFileShow(column, record, src)"/>
-                  <Image v-else-if="preview.isAudio(src)" cursor="pointer" :image="Icon.auto"
-                         :width="MaxSize(width, filePreviewSize)"
-                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
-                         @click="onFileShow(column, record, src)"/>
-                  <Image v-else-if="preview.isVideo(src)" cursor="pointer" :image="Icon.video"
-                         :width="MaxSize(width, filePreviewSize)"
-                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
-                         @click="onFileShow(column, record, src)"/>
-                  <Image v-else-if="preview.isZip(src)" cursor="pointer" :image="Icon.zip"
-                         :width="MaxSize(width, filePreviewSize)"
-                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
-                         @click="onFileShow(column, record, src)"/>
-                  <Image v-else cursor="pointer" :image="Icon.auto" :width="MaxSize(width, filePreviewSize)"
-                         :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
-                         @click="onFileShow(column, record, src)"/>
+                <Group v-for="src in fileList(record, column)" :key="src"
+                  :width="MaxSize(width, filePreviewSize)"
+                  :height="MaxSize(width, filePreviewSize)"
+                  display="flex" justifyContent="center" alignItems="center">
+                  <Group v-if="preview.isImage(src)">
+                    <Image  cursor="pointer" :image="imageCrop(src, width)"
+                            :max-width="MaxSize(width, filePreviewSize)" :max-height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding" :keepAspectRatio="true"
+                            @click="onFileShow(column, record, src)"/>
+                  </Group>
+                  <Group v-else-if="preview.isAudio(src)">
+                    <Image cursor="pointer" :image="Icon.auto"
+                           :width="MaxSize(width, filePreviewSize)"
+                           :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                           @click="onFileShow(column, record, src)"/>
+                  </Group>
+                  <Group v-else-if="preview.isVideo(src)">
+                    <Image cursor="pointer" :image="Icon.video"
+                           :width="MaxSize(width, filePreviewSize)"
+                           :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                           @click="onFileShow(column, record, src)"/>
+                  </Group>
+                  <Group v-else-if="preview.isZip(src)">
+                    <Image cursor="pointer" :image="Icon.zip"
+                           :width="MaxSize(width, filePreviewSize)"
+                           :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                           @click="onFileShow(column, record, src)"/>
+                  </Group>
+                  <Group v-else>
+                    <Image cursor="pointer" :image="Icon.auto" :width="MaxSize(width, filePreviewSize)"
+                           :height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding"
+                           @click="onFileShow(column, record, src)"/>
+                  </Group>
                 </Group>
                 <Image :image="Icon.upload" :width="24" :height="24" :boundsPadding="boundsPadding" cursor="pointer"
                        @click="onFileUpload(column, record)"/>
