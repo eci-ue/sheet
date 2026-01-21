@@ -16,7 +16,8 @@ export const emitNames = [
   "change", "updateCell", "fillCell",
   "addColumn", "removeColumn", "editColumn", "widthColumn",
   "addRow", "removeRow",
-  "move"
+  "move",
+  "scroll"
 ];
 
 

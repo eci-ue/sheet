@@ -57,6 +57,11 @@ const props = defineProps({
     required: false,
     type: Boolean as PropType<boolean>,
   },
+  header: {
+    required: false,
+    default: () => true,
+    type: Boolean as PropType<boolean>,
+  },
   addColumn: {
     required: false,
     type: Boolean as PropType<boolean>,
@@ -303,8 +308,8 @@ const imageCrop = function(value: string, width: number): string {
 
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex items-center gap-x-5 sheet-header" v-if="toolbar">
-      <Toolbar @click="toolbarClick" :disabled="disabled"></Toolbar>
+    <div class="flex items-center gap-x-5 sheet-header" v-if="header">
+      <Toolbar v-if="toolbar" @click="toolbarClick" :disabled="disabled"></Toolbar>
       <div class="flex-1">
         <slot name="toolbar"></slot>
       </div>
