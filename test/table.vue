@@ -22,55 +22,15 @@ const list = [
       "https://lint.eci.games/out/images/20260109/56f2a475e8104ae9a7db67e01ec547a9.png",
       "https://lint.eci.games/out/images/20251106/0l2W73YV9QY9DlPcloMZ97QPi2yvvN/ce426b0b21e35ff5b4c937da59fd90a1.png?filename=image_1.png",
       "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
+    ]`,
   },
   {
     key1: "A1",
-    key2: `[
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
-  },
-  {
-    key1: "A1",
-    key2: `[
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
-  },
-  {
-    key1: "A1",
-    key2: `[
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
-  },
-  {
-    key1: "A1",
-    key2: `[
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
-  },
-  {
-    key1: "A1",
-    key2: `[
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
-  },
-  {
-    key1: "A1",
-    key2: `[
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx",
-      "https://lint.eci.games/out/images/20251226/90TkWIKbJUPTwB6WDRzJGqg88UPvcQ/QIDSSR_eCOA%20Tablet.xlsx"
-    ]`
+    key2: "https://lint.eci.games/out/images/20260109/56f2a475e8104ae9a7db67e01ec547a9.png",
+    key3: {
+      pic: "",
+      txt: "hello worldhello worldhello worldhello worldhello worldhello worldhello worldhello world"
+    }
   },
 ];
 
@@ -112,7 +72,8 @@ const onCrop = function({src, size}: {src: string, size: number}) {
     <Table class="h-full"
            :column-list="columns"
            :row-list="list"
-           :row-number="false"
+           :row-number="true"
+           :disabled="true"
            :add-column="false"/>
   </Spin>
 </template>

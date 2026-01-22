@@ -296,12 +296,17 @@ const MaxSize = function (width: number, value: number): number {
   return (value + padding) > width ? (width - padding) : value;
 }
 
-const imageCrop = function(value: string, width: number): string {
+const imageCrop = function (value: string, width: number): string {
   if (props.filePreviewCrop && value) {
     const size = MaxSize(width, props.filePreviewSize);
     return props.filePreviewCrop({src: value, size});
   }
   return value;
+}
+
+const toText = function (data: object, key: string) {
+  const format = styleCell.format(key);
+  return format(data);
 }
 
 </script>
@@ -338,13 +343,14 @@ const imageCrop = function(value: string, width: number): string {
             <template #customLayout="{ width, record }">
               <Group :width="width" display="flex" align-items="center" flexWrap="wrap">
                 <Group v-for="src in fileList(record, column)" :key="src"
-                  :width="MaxSize(width, filePreviewSize)"
-                  :height="MaxSize(width, filePreviewSize)"
-                  display="flex" justifyContent="center" alignItems="center">
+                       :width="MaxSize(width, filePreviewSize)"
+                       :height="MaxSize(width, filePreviewSize)"
+                       display="flex" justifyContent="center" alignItems="center">
                   <Group v-if="preview.isImage(src)">
-                    <Image  cursor="pointer" :image="imageCrop(src, width)"
-                            :max-width="MaxSize(width, filePreviewSize)" :max-height="MaxSize(width, filePreviewSize)" :boundsPadding="boundsPadding" :keepAspectRatio="true"
-                            @click="onFileShow(column, record, src)"/>
+                    <Image cursor="pointer" :image="imageCrop(src, width)"
+                           :max-width="MaxSize(width, filePreviewSize)" :max-height="MaxSize(width, filePreviewSize)"
+                           :boundsPadding="boundsPadding" :keepAspectRatio="true"
+                           @click="onFileShow(column, record, src)"/>
                   </Group>
                   <Group v-else-if="preview.isAudio(src)">
                     <Image cursor="pointer" :image="Icon.auto"
@@ -387,7 +393,7 @@ const imageCrop = function(value: string, width: number): string {
                       :style="styleCell.Style"
                       :readOnly="column.readOnly">
             <template #customLayout="{ width, height, record }">
-              <Group :width="width" :height="height" display="flex" align-items="center" :vue="{}">
+              <Group :width="width" display="flex" align-items="center" :vue="{}">
                 <component :is="customCell(column.custom)"
                            :width="width"
                            :height="height"
