@@ -72,6 +72,11 @@ const props = defineProps({
     type: Boolean as PropType<boolean>,
     default: () => true,
   },
+  minColumnWidth: {
+    required: false,
+    default: () => 50,
+    type: Number as PropType<number>,
+  },
   filePreviewSize: {
     required: false,
     default: () => 80,
@@ -334,7 +339,7 @@ const toText = function (data: object, key: string) {
           <ListColumn v-if="column.type === CellType.file || column.type === CellType.image"
                       :field="column.columnId"
                       :title="column.label"
-                      :width="Math.max(column.width || 0, 150)"
+                      :width="Math.max(column.width || 0, minColumnWidth)"
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"
@@ -384,7 +389,7 @@ const toText = function (data: object, key: string) {
           <ListColumn v-else-if="column.custom"
                       :field="column.columnId"
                       :title="column.label"
-                      :width="Math.max(column.width || 0, 150)"
+                      :width="Math.max(column.width || 0, minColumnWidth)"
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"
@@ -408,7 +413,7 @@ const toText = function (data: object, key: string) {
           <ListColumn v-else
                       :field="column.columnId"
                       :title="column.label"
-                      :width="Math.max(column.width || 0, 150)"
+                      :width="Math.max(column.width || 0, minColumnWidth)"
                       :merge-cell="false"
                       :editor="column.editor"
                       :options="column.options"
