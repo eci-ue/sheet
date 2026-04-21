@@ -229,6 +229,7 @@ defineExpose({
   load: onLoad,  // 整体刷新
   loadRows: () => onLoad("row"),        // 刷新表格内容
   loadColumns: () => onLoad("column"),  // 刷新表头内容
+  getCells,         // 获取所有表格数据
   getInstance,      // 获取表格对象
   getSelectedCells, // 获取当前选中的单元格内容
   clearSelected,    // 清除单元格选中状态

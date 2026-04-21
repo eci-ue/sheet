@@ -6,7 +6,7 @@ import * as VTable from "@visactor/vtable";
 import safeGet from "@fengqiaogang/safe-get";
 import safeSet from "@fengqiaogang/safe-set";
 import {CellType, Column} from "../types/sheet";
-import {MenuEvent, ToolbarEvent, toCalls} from "./config";
+import {MenuEvent, ToolbarEvent, toCalls, addColumnKey} from "./config";
 
 
 import type {EmitFn} from "vue";
@@ -41,8 +41,28 @@ export const useEvent = function () {
     if (!instance) {
       return [];
     }
-    const value = instance.getSelectedCellInfos();
-    return toCalls(value);
+    const list: Cell[][] = [];
+    const cells = instance.getSelectedCellInfos();
+    for (const array of cells) {
+      const rows: Cell[] = [];
+      for (const item of array) {
+        const columnId = safeGet<string>(item, "field")!;
+        if (columnId === addColumnKey || columnId === "_vtable_rowSeries_number") {
+          continue;
+        }
+        const value = safeGet<Cell | string | undefined>(item, "value");
+        if (_.isNil(value) || _.isString(value) || _.isNumber(value)) {
+          const cell = new Cell();
+          cell.columnId = columnId;
+          cell.rowId = safeGet<string>(item, "originData.rowId")!;
+          cell.txt = value as string;
+          item.value = cell;
+        }
+        rows.push(item);
+      }
+      list.push(rows);
+    }
+    return list;
   }
 
   const clearSelected = function () {
