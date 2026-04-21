@@ -4,8 +4,9 @@
  */
 
 import "./style.less";
-// import Demo from "./demo.vue";
-import Demo from "./table.vue";
+// import Demo from "./test.vue";
+import Demo from "./demo.vue";
+// import Demo from "./table.vue";
 import { createApp as create } from "vue";
 
 import type { App } from "vue";

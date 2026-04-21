@@ -29,9 +29,9 @@ export class Column {
   public type: CellType;         // 单元格类型, 默认文本类型
   public columnId!: string;         // 列ID
   public label: string = "";            // 名称
-  public width: number = 210;       // 列宽
-  public readOnly: boolean = false; // 是否只读, 默认允许编辑
-  public options: OptionKV[] = [];  // 辅助数据列表
+  public width?: number = 210;       // 列宽
+  public readOnly?: boolean = false; // 是否只读, 默认允许编辑
+  public options?: OptionKV[] = [];  // 辅助数据列表
   public editor?: string;           // 编辑器组件名称
   public custom?: string;           // 自定义渲染
   public fixed?: string | boolean;  // 固定列
@@ -64,7 +64,7 @@ export class Cell {
 }
 
 export interface RowBasis {
-  sort: number;  // 序号
+  sort?: number;  // 序号
   rowId: string; // 行ID
 }
 

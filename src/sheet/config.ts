@@ -76,7 +76,7 @@ export const isReadOnly = function (columns: Column[] = [], columnId?: string): 
     for (const item of columns) {
       const id = safeGet<string>(item, "columnId") || safeGet<string>(item, "field");
       if (id === columnId) {
-        readOnly = item.readOnly;
+        readOnly = item.readOnly ?? false;
       }
       if (readOnly) {
         break;
@@ -189,9 +189,9 @@ export const SheetConfig = function (sheetId?: number | string, disabled: boolea
     editCellTrigger: 'doubleclick',
     // editCellTrigger: 'click',
     keyboardOptions: {
-      copySelected: true, // 允许拷贝
-      pasteValueToCell: false, // 禁止粘贴
-      selectAllOnCtrlA: true // 允许全选
+      copySelected: true, // 是否允许拷贝
+      pasteValueToCell: true, // 是否允许粘贴
+      selectAllOnCtrlA: true // 是否允许全选
     },
     customConfig: {
       createReactContainer: true,
@@ -250,4 +250,30 @@ export const GetCell = function (columns: Column[] = [], rows: Row[] = [], colum
     data.columnId = column.columnId;
     return data;
   }
+}
+
+export const toCalls = function (cells: Array<any[]>): Cell[][] {
+  const list: Cell[][] = [];
+  for (const array of cells) {
+    const rows: Cell[] = [];
+    for (const item of array) {
+      const columnId = safeGet<string>(item, "field")!;
+      if (columnId === addColumnKey || columnId === "_vtable_rowSeries_number") {
+        continue;
+      }
+      const value = safeGet<Cell | string | undefined>(item, "value");
+      if (_.isNil(value) || _.isString(value) || _.isNumber(value)) {
+        const cell = new Cell();
+        cell.row = safeGet<number>(item, "row")!
+        cell.column = safeGet<number>(item, "col")!;
+        cell.columnId = columnId;
+        cell.rowId = safeGet<string>(item, "originData.rowId")!;
+        cell.txt = value as string;
+        cell.style = safeGet<object>(item, "dataValue.style");
+        rows.push(cell);
+      }
+    }
+    list.push(rows);
+  }
+  return list;
 }

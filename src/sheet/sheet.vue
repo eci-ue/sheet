@@ -8,7 +8,7 @@ import * as preview from "../util/preview";
 import {emitNames, useEvent} from "./event";
 import safeGet from "@fengqiaogang/safe-get";
 import {useColumnList, useRowList} from "./use";
-import {onMounted, watch, ref, computed} from "vue";
+import {onMounted, watch, ref, computed, onBeforeUnmount} from "vue";
 import {Column, CellType, Cell} from "../types/sheet";
 import {SheetConfig, Icon, addColumnKey} from "./config";
 import {Group, ListColumn, ListTable, Image, Text} from "@visactor/vue-vtable";
@@ -79,8 +79,10 @@ const props = defineProps({
 });
 
 const fileRef = ref();
+const boxRef  = ref();
 const imageRef = ref();
-const {sheetRef, getInstance, bindEvent, toolbarClick, getSelectedCells, clearSelected} = useEvent();
+const isTableActive = ref<boolean>(false);
+const {sheetRef, getInstance, bindEvent, toolbarClick, getCells, getSelectedCells, clearSelected} = useEvent();
 
 const getColumnList: ColumnList = function () {
   if (props.columnList && Array.isArray(props.columnList)) {
@@ -190,10 +192,35 @@ const onFileUpload = function (column: Column, record: Row) {
   }
 }
 
+// 点击外部
+const handleClickOutside = (e: MouseEvent) => {
+  const el = boxRef.value;
+  if (el) {
+    isTableActive.value = el.contains(e.target as Node);
+  }
+};
+
+const handlePaste = function () {
+  if (isTableActive.value) {
+    setTimeout(function () {
+      const list = getCells();
+      $emit("updateCell", _.flattenDeep(list));
+    }, 300);
+  }
+}
+
 
 onMounted(async function () {
   await onLoad();
   setTimeout(() => bindEvent($emit, props.uuid || props.sheetId));
+
+  document.addEventListener("click", handleClickOutside);
+  document.addEventListener("paste", handlePaste);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener("paste", handlePaste);
 });
 
 defineExpose({
@@ -309,7 +336,7 @@ const imageCrop = function(value: string, width: number): string {
         <slot name="toolbar"></slot>
       </div>
     </div>
-    <div class="flex-auto">
+    <div class="flex-auto" ref="boxRef">
       <div style="display: none">
         <input type="file" ref="fileRef" @change="onFileSelect"/>
         <input type="file" accept="image/*" ref="imageRef" @change="onFileSelect"/>
