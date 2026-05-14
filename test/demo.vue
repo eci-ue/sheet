@@ -190,6 +190,10 @@ const onUpload = function (cell: Cell) {
   console.log(cell);
 }
 
+const onSelected = function (e) {
+  console.log(e);
+}
+
 </script>
 
 <template>
@@ -213,7 +217,8 @@ const onUpload = function (cell: Cell) {
            @removeRow="onRemoveRow"
            @fillCell="onFillCell"
            @clickFile="onShowFile"
-           @upload="onUpload">
+           @upload="onUpload"
+           @selected="onSelected">
     </Sheet>
   </Spin>
 </template>

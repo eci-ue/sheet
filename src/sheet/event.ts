@@ -305,11 +305,7 @@ export const useEvent = function () {
     // 监听右键菜单点击事件
     instance.off(VTable.ListTable.EVENT_TYPE.SELECTED_CELL);
     instance.on(VTable.ListTable.EVENT_TYPE.SELECTED_CELL, function (e: object) {
-      const ranges: Cell[][] = getSelectedCells();
-      $emit("selected", {
-        ...e,
-        ranges,
-      })
+      $emit("selected", e);
     });
 
 
